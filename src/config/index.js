@@ -25,6 +25,8 @@ export const config = {
   db: {
     url: env.SUPABASE_URL || '',
     serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || '',
+    // We share the Cowboy Mind project but live entirely in our own schema.
+    schema: env.DB_SCHEMA || 'outreach',
   },
   phone: {
     twilioAccountSid: env.TWILIO_ACCOUNT_SID || '',
