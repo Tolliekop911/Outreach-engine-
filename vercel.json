@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/tick", "schedule": "*/15 * * * *" }
+  ],
+  "functions": {
+    "api/tick.js": { "maxDuration": 60 }
+  },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/t/open/:token", "destination": "/api/t/open/:token" },
+    { "source": "/t/click/:token", "destination": "/api/t/click/:token" },
+    { "source": "/u/:token", "destination": "/api/u/:token" },
+    { "source": "/webhooks/email", "destination": "/api/webhooks/email" },
+    { "source": "/webhooks/inbound-email", "destination": "/api/webhooks/inbound-email" }
+  ]
+}

@@ -155,6 +155,32 @@ matched to a lead, recorded, and classified:
 A genuine human reply always stops the automated sequence so no one keeps
 getting blasted after they respond.
 
+## Deployment (Vercel)
+
+The webhooks run as serverless functions under `api/`, the root shows a small
+status page (`public/index.html`), and the scheduler runs on Vercel Cron.
+`vercel.json` maps the pretty paths and declares the cron.
+
+Set these environment variables in the Vercel project (Settings -> Environment
+Variables): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`,
+`AI_MODEL`, `EMAIL_PROVIDER`, `EMAIL_API_KEY`, `EMAIL_FROM_ADDRESS`,
+`EMAIL_FROM_NAME`, `EMAIL_POSTAL_ADDRESS`, `TRACKING_SECRET`, all `OUTREACH_*`,
+and `CRON_SECRET`. Set `TRACKING_BASE_URL` to the deployed domain (e.g.
+`https://outreach-engine-steel.vercel.app`) and `DRY_RUN=false` only when you
+are ready to send.
+
+Routes once deployed: `/` (status), `/health`, `/t/open/:token`,
+`/t/click/:token`, `/u/:token`, `/webhooks/email`, `/webhooks/inbound-email`,
+and `/api/tick` (cron-only, guarded by `CRON_SECRET`).
+
+Notes:
+- The cron is set to every 15 minutes. **Vercel Hobby limits cron frequency**
+  (often once per day); minute/quarter-hour cadences need a Pro plan. Adjust
+  the `schedule` in `vercel.json` to your plan.
+- Each `/api/tick` processes a small batch (25) to fit the function time limit;
+  daily caps still govern total volume. For high throughput, run the scheduler
+  as a long-lived worker (`npm run run-campaigns`) on a VM instead of cron.
+
 ## Status
 
 Day 1 scaffold. No channels wired yet, no data imported. See `docs/roadmap.md`.

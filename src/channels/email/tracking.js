@@ -53,7 +53,7 @@ function base() {
 
 export function openPixelUrl(messageId) {
   const t = signToken({ k: 'o', m: messageId });
-  return `${base()}/t/open/${t}.gif`;
+  return `${base()}/t/open/${t}`;
 }
 
 export function clickUrl(messageId, targetUrl) {
