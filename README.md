@@ -173,13 +173,21 @@ Routes once deployed: `/` (status), `/health`, `/t/open/:token`,
 `/t/click/:token`, `/u/:token`, `/webhooks/email`, `/webhooks/inbound-email`,
 and `/api/tick` (cron-only, guarded by `CRON_SECRET`).
 
-Notes:
-- The cron is set to every 15 minutes. **Vercel Hobby limits cron frequency**
-  (often once per day); minute/quarter-hour cadences need a Pro plan. Adjust
-  the `schedule` in `vercel.json` to your plan.
-- Each `/api/tick` processes a small batch (25) to fit the function time limit;
-  daily caps still govern total volume. For high throughput, run the scheduler
-  as a long-lived worker (`npm run run-campaigns`) on a VM instead of cron.
+### Scheduling the tick
+
+Vercel Hobby only allows once-daily cron, so the scheduler runs from **GitHub
+Actions** (`.github/workflows/scheduler.yml`) every 15 minutes, which pings
+`/api/tick`. Set two repository secrets (Settings -> Secrets and variables ->
+Actions):
+- `TICK_URL` = `https://<your-domain>/api/tick`
+- `CRON_SECRET` = the same value set as `CRON_SECRET` in Vercel
+
+Alternatives: upgrade to Vercel Pro and add a `crons` entry back to
+`vercel.json`, or run the scheduler as a long-lived worker
+(`npm run run-campaigns --loop 60`) on a VM.
+
+Each `/api/tick` processes a small batch (25) to fit the function time limit;
+daily caps still govern total volume.
 
 ## Status
 
