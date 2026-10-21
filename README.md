@@ -138,6 +138,23 @@ campaigns are skipped, suppressed leads drop out, and hitting a channel's daily
 cap stops the tick without losing position. Run one tick per cron invocation in
 production.
 
+## Inbound replies
+
+Point your email provider's inbound-parse (or an IMAP bridge) at
+`POST /webhooks/inbound-email` with `{ from, subject, text }`. Each reply is
+matched to a lead, recorded, and classified:
+
+- **opt_out** (also caught deterministically before any AI call) -> suppressed
+  on all channels, sequence stopped.
+- **interested** -> lead marked engaged, sequence stopped, flagged for a human
+  (emails `OUTREACH_HANDOFF_EMAIL` if set). No salesy auto-reply.
+- **question** -> AI drafts a grounded answer and sends it (tracked, DRY_RUN-safe).
+- **not_interested / wrong_person / other** -> sequence stopped.
+- **auto_reply** (out-of-office) -> ignored, sequence keeps running.
+
+A genuine human reply always stops the automated sequence so no one keeps
+getting blasted after they respond.
+
 ## Status
 
 Day 1 scaffold. No channels wired yet, no data imported. See `docs/roadmap.md`.

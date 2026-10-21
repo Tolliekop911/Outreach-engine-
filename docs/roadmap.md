@@ -19,8 +19,8 @@ next year, so the list can be imported and worked automatically from day one.
 ## Phase 2 - AI
 - [x] AI message generation, personalized per lead (email; Claude)
 - [ ] AI generation for SMS/voice scripts
-- [ ] Inbound reply classification (interested / not / opt-out / question)
-- [ ] AI auto-responses with human handoff for hot leads
+- [x] Inbound reply classification (interested / not / opt-out / question)
+- [x] AI auto-responses with human handoff for hot leads
 
 ## Phase 3 - Pipeline
 - [x] Campaign sequence runner (multi-step, multi-channel, per-step delays)

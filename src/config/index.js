@@ -32,6 +32,8 @@ export const config = {
     valueProp: env.OUTREACH_VALUE_PROP || '',
     cta: env.OUTREACH_CTA || '',
     ctaUrl: env.OUTREACH_CTA_URL || '',
+    // Where hot-lead handoffs are emailed for human follow-up (optional).
+    handoffEmail: env.OUTREACH_HANDOFF_EMAIL || '',
   },
   db: {
     url: env.SUPABASE_URL || '',

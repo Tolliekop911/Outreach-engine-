@@ -13,6 +13,7 @@ import { verifyToken } from './channels/email/tracking.js';
 import {
   recordOpen, recordClick, recordUnsubscribe, handleSendgridEvents,
 } from './channels/email/webhooks.js';
+import { handleInboundEmail } from './channels/email/inbound.js';
 
 // 1x1 transparent GIF.
 const PIXEL = Buffer.from(
@@ -96,6 +97,17 @@ const server = http.createServer(async (req, res) => {
       let events;
       try { events = JSON.parse(raw); } catch { return send(res, 400, {}, 'bad json'); }
       const out = await handleSendgridEvents(events);
+      return send(res, 200, { 'Content-Type': 'application/json' }, JSON.stringify(out));
+    }
+
+    // Inbound reply webhook: POST /webhooks/inbound-email
+    // Expects JSON { from, subject, text, providerId }. Point your provider's
+    // inbound-parse (or an IMAP bridge) at this route.
+    if (req.method === 'POST' && url.pathname === '/webhooks/inbound-email') {
+      const raw = await readBody(req);
+      let payload;
+      try { payload = JSON.parse(raw); } catch { return send(res, 400, {}, 'bad json'); }
+      const out = await handleInboundEmail(payload);
       return send(res, 200, { 'Content-Type': 'application/json' }, JSON.stringify(out));
     }
 
