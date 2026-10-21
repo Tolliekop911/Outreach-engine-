@@ -52,6 +52,14 @@ export const config = {
     fromAddress: env.EMAIL_FROM_ADDRESS || '',
     fromName: env.EMAIL_FROM_NAME || '',
     postalAddress: env.EMAIL_POSTAL_ADDRESS || '',
+    // SMTP (e.g. Namecheap Private Email). Used when EMAIL_PROVIDER=smtp.
+    smtp: {
+      host: env.SMTP_HOST || 'mail.privateemail.com',
+      port: int(env.SMTP_PORT, 465),
+      secure: env.SMTP_SECURE ? env.SMTP_SECURE !== 'false' : true,
+      user: env.SMTP_USER || '',
+      pass: env.SMTP_PASS || '',
+    },
   },
   tracking: {
     baseUrl: (env.TRACKING_BASE_URL || '').replace(/\/$/, ''),

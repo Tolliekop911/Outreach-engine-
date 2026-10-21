@@ -77,8 +77,10 @@ database.
 
 ## Email channel
 
-Provider-agnostic. Set `EMAIL_PROVIDER=console` to log sends with no
-credentials, or `sendgrid` with `EMAIL_API_KEY` to send for real. Every send:
+Provider-agnostic. Set `EMAIL_PROVIDER` to `console` (logs, no send),
+`smtp` (Namecheap Private Email or any mailbox), or `sendgrid`. For SMTP set
+`SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS`
+(defaults target `mail.privateemail.com:465`). Every send:
 
 - checks the global suppression list first and skips suppressed addresses,
 - respects `MAX_EMAILS_PER_DAY` and the `DRY_RUN` safety switch,
@@ -108,6 +110,18 @@ same engine can sell a different product without code changes. Generation:
 - returns a subject and an HTML body, parsed defensively from the model,
 - is instructed not to invent facts or add a signature/unsubscribe/footer
   (the email channel appends those), and handles safety refusals.
+
+**SMTP deliverability (important):** Namecheap Private Email is a mailbox
+service, not a bulk sender. It enforces per-hour/day send limits and its terms
+discourage unsolicited bulk mail, so sending thousands of cold emails through it
+risks throttling or account suspension and poor inbox placement. Keep
+`MAX_EMAILS_PER_DAY` low, warm up slowly, make sure the domain has SPF/DKIM/DMARC
+set, and consider a dedicated subdomain. For true volume, a provider that
+permits cold outreach is the safer path.
+
+**Inbound replies over Namecheap:** Private Email has no inbound webhook, so
+`/webhooks/inbound-email` needs an IMAP poller that reads the mailbox and posts
+new messages to it (not built yet - next step).
 
 Default model is `claude-opus-5-5`; set `AI_MODEL=claude-sonnet-5-5` or
 `claude-haiku-5-5` for cheaper bulk generation. Needs `ANTHROPIC_API_KEY`.

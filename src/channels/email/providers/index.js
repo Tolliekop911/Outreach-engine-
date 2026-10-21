@@ -4,9 +4,11 @@
 import config from '../../../config/index.js';
 import { consoleProvider } from './console.js';
 import { sendgridProvider } from './sendgrid.js';
+import { smtpProvider } from './smtp.js';
 
 const PROVIDERS = {
   console: consoleProvider,
+  smtp: smtpProvider,
   sendgrid: sendgridProvider,
 };
 
