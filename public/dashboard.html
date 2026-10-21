@@ -5,220 +5,255 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Outreach Admin</title>
 <style>
-  :root {
-    --bg: #f6f7f9; --card: #fff; --text: #1a1d21; --muted: #6b7280;
-    --border: #e5e7eb; --accent: #2563eb; --good: #16a34a; --warn: #b45309; --bad: #dc2626;
+  :root{
+    --bg:#f4f5f8; --panel:#ffffff; --panel2:#fbfcfe; --text:#141821; --muted:#697586;
+    --border:#e6e9ef; --accent:#4f46e5; --accent-soft:#eef0fe;
+    --good:#0f9d58; --good-soft:#e6f6ee; --warn:#b45309; --warn-soft:#fdf2e3;
+    --bad:#dc2626; --bad-soft:#fdeaea; --info:#2563eb; --info-soft:#e8f0fe;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0f1216; --card:#171b21; --text:#e6e8eb; --muted:#9aa4b2; --border:#262c36; --accent:#4f86ff; }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0c0f14; --panel:#141922; --panel2:#111621; --text:#e8ebf0; --muted:#8b96a7;
+      --border:#232a36; --accent:#8b8cff; --accent-soft:#1c2030;
+      --good:#36c98a; --good-soft:#132019; --warn:#e0a44b; --warn-soft:#231c10;
+      --bad:#f3736f; --bad-soft:#2a1717; --info:#6aa0ff; --info-soft:#141c2b;
+      --shadow:0 1px 2px rgba(0,0,0,.4); }
   }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
-  header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--card); position:sticky; top:0; }
-  header h1 { font-size:16px; margin:0; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  button { font: inherit; cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--text); padding:6px 12px; border-radius:8px; }
-  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
-  button:disabled { opacity:.5; cursor:default; }
-  input, select { font: inherit; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); }
-  .tabs { display:flex; gap:6px; margin:16px 0; flex-wrap:wrap; }
-  .tabs button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
-  .tile { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
-  .tile .n { font-size:26px; font-weight:700; }
-  .tile .l { color:var(--muted); font-size:12px; margin-top:4px; text-transform:uppercase; letter-spacing:.03em; }
-  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); font-size:14px; }
-  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; }
-  tr:last-child td { border-bottom:none; }
-  .badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); }
-  .b-active{ color:var(--good); border-color:var(--good); }
-  .b-paused{ color:var(--warn); border-color:var(--warn); }
-  .b-engaged{ color:var(--accent); border-color:var(--accent); }
-  .b-suppressed{ color:var(--bad); border-color:var(--bad); }
-  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
-  .muted { color:var(--muted); }
-  .center { min-height:70vh; display:flex; align-items:center; justify-content:center; }
-  .login { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; width:320px; max-width:90vw; }
-  .login h2 { margin:0 0 12px; }
-  .err { color:var(--bad); font-size:13px; min-height:18px; }
-  .hide { display:none; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:var(--panel);border-right:1px solid var(--border);padding:18px 14px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;padding:6px 8px 16px}
+  .dot{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#8b5cf6)}
+  .nav{display:flex;flex-direction:column;gap:3px}
+  .nav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;color:var(--muted);font:inherit;padding:9px 10px;border-radius:9px;cursor:pointer}
+  .nav button:hover{background:var(--panel2);color:var(--text)}
+  .nav button.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .nav svg{width:17px;height:17px;flex:none}
+  .main{min-width:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--border);background:var(--panel)}
+  .topbar h2{margin:0;font-size:17px}
+  .topbar .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .content{padding:22px 26px;max-width:1120px}
+  .btn{font:inherit;cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--text);padding:7px 13px;border-radius:9px;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--muted)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.ghost{box-shadow:none;background:transparent}
+  .btn:disabled{opacity:.5;cursor:default}
+  input,select{font:inherit;padding:9px 11px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--text);outline:none}
+  input:focus,select:focus{border-color:var(--accent)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .kpi .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:12px}
+  .kpi .ic svg{width:18px;height:18px}
+  .kpi .n{font-size:27px;font-weight:700;letter-spacing:-.02em}
+  .kpi .l{color:var(--muted);font-size:13px;margin-top:3px}
+  .acc-a{background:var(--accent-soft);color:var(--accent)}
+  .acc-g{background:var(--good-soft);color:var(--good)}
+  .acc-i{background:var(--info-soft);color:var(--info)}
+  .acc-w{background:var(--warn-soft);color:var(--warn)}
+  .cols{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:14px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+  .card h3{margin:0 0 14px;font-size:14px}
+  .funnel .row{display:grid;grid-template-columns:90px 1fr 92px;align-items:center;gap:10px;margin-bottom:12px}
+  .funnel .row:last-child{margin-bottom:0}
+  .funnel .lab{font-size:13px;color:var(--muted)}
+  .bar{height:10px;border-radius:6px;background:var(--panel2);overflow:hidden;border:1px solid var(--border)}
+  .bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#8b5cf6)}
+  .funnel .val{text-align:right;font-size:13px}
+  .funnel .val b{font-weight:700}
+  .funnel .val .pc{color:var(--muted)}
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mini .m{background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:13px}
+  .mini .m .n{font-size:20px;font-weight:700}
+  .mini .m .l{color:var(--muted);font-size:12px;margin-top:2px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);font-size:14px}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:var(--panel2)}
+  tbody tr:hover{background:var(--panel2)}
+  tr:last-child td{border-bottom:none}
+  .pill{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:500;display:inline-block}
+  .p-active,.p-new{background:var(--info-soft);color:var(--info)}
+  .p-engaged{background:var(--accent-soft);color:var(--accent)}
+  .p-converted,.p-completed{background:var(--good-soft);color:var(--good)}
+  .p-suppressed,.p-unqualified{background:var(--bad-soft);color:var(--bad)}
+  .p-paused,.p-draft{background:var(--warn-soft);color:var(--warn)}
+  .p-archived{background:var(--panel2);color:var(--muted)}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .muted{color:var(--muted)}
+  .empty{text-align:center;padding:46px 20px;color:var(--muted)}
+  .empty svg{width:40px;height:40px;opacity:.5;margin-bottom:10px}
+  .empty h4{margin:0 0 4px;color:var(--text);font-size:15px}
+  .err{background:var(--bad-soft);color:var(--bad);border:1px solid var(--border);border-radius:11px;padding:12px 14px;font-size:14px}
+  .skeleton{height:92px;border-radius:14px;background:linear-gradient(90deg,var(--panel2),var(--border),var(--panel2));background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border)}
+    .nav{flex-direction:row;overflow:auto}
+    .kpis{grid-template-columns:1fr 1fr}
+    .cols{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
-
-<div id="loginView" class="center">
-  <form class="login" id="loginForm">
-    <h2>Outreach Admin</h2>
-    <p class="muted" style="margin-top:0;font-size:13px">Enter the admin password.</p>
-    <input id="pw" type="password" placeholder="Password" style="width:100%;margin-bottom:10px" autocomplete="current-password" />
-    <button class="primary" type="submit" style="width:100%">Sign in</button>
-    <p class="err" id="loginErr"></p>
-  </form>
-</div>
-
-<div id="appView" class="hide">
-  <header>
-    <h1>Cowboy Outreach - Admin</h1>
-    <button id="logout">Sign out</button>
-  </header>
-  <div class="wrap">
-    <div class="tabs">
-      <button data-tab="overview" class="active">Overview</button>
-      <button data-tab="leads">Leads</button>
-      <button data-tab="campaigns">Campaigns</button>
-      <button data-tab="hot">Hot leads</button>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="dot"></span> Cowboy Outreach</div>
+    <nav class="nav" id="nav">
+      <button data-tab="overview" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"/></svg> Overview</button>
+      <button data-tab="leads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg> Leads</button>
+      <button data-tab="campaigns">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3zM11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Campaigns</button>
+      <button data-tab="hot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Hot leads</button>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div><h2 id="title">Overview</h2><div class="sub" id="subtitle">Campaign performance at a glance</div></div>
+      <button class="btn ghost" id="refresh">Refresh</button>
     </div>
-    <div id="panel"></div>
-  </div>
+    <div class="content" id="panel"></div>
+  </main>
 </div>
 
 <script>
-const PW_KEY = 'outreach_admin_pw';
-let pw = sessionStorage.getItem(PW_KEY) || '';
-
-async function api(path, opts = {}) {
-  const res = await fetch(path, {
-    ...opts,
-    headers: { 'Authorization': 'Bearer ' + pw, 'Content-Type': 'application/json', ...(opts.headers||{}) },
+async function api(path, opts={}){
+  const res = await fetch(path + (path.includes('?')?'&':'?') + '_=' + Date.now(), {
+    ...opts, headers:{'Content-Type':'application/json', ...(opts.headers||{})}
   });
-  if (res.status === 401 || res.status === 503) { logout(); throw new Error('unauthorized'); }
-  if (!res.ok) throw new Error((await res.json().catch(()=>({})))?.error || ('HTTP ' + res.status));
+  if(!res.ok) throw new Error((await res.json().catch(()=>({})))?.error || ('HTTP '+res.status));
   return res.json();
 }
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const num=n=>Number(n||0).toLocaleString();
+const pill=s=>`<span class="pill p-${esc(s)}">${esc(s)}</span>`;
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const name=l=>esc([l.first_name,l.last_name].filter(Boolean).join(' ')||'-');
+const icon=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p}</svg>`;
 
-const $ = (s) => document.querySelector(s);
-const el = (h) => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
-const esc = (s) => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const badge = (s) => `<span class="badge b-${esc(s)}">${esc(s)}</span>`;
+const TABS={
+  overview:['Overview','Campaign performance at a glance'],
+  leads:['Leads','Everyone in the system'],
+  campaigns:['Campaigns','Sequences and their progress'],
+  hot:['Hot leads','Interested replies to follow up personally'],
+};
+let tab='overview';
+const leadState={offset:0,status:'',q:''};
 
-function showApp() { $('#loginView').classList.add('hide'); $('#appView').classList.remove('hide'); }
-function showLogin() { $('#appView').classList.add('hide'); $('#loginView').classList.remove('hide'); }
-function logout() { pw=''; sessionStorage.removeItem(PW_KEY); showLogin(); }
-
-$('#loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  pw = $('#pw').value;
-  $('#loginErr').textContent = '';
-  try {
-    await api('/api/admin/summary');
-    sessionStorage.setItem(PW_KEY, pw);
-    showApp(); loadTab('overview');
-  } catch { $('#loginErr').textContent = 'Wrong password or server not configured.'; pw=''; }
-});
-$('#logout').addEventListener('click', logout);
-
-document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
-  b.classList.add('active');
-  loadTab(b.dataset.tab);
-}));
-
-let leadState = { offset: 0, status: '', q: '' };
-
-async function loadTab(tab) {
-  const p = $('#panel');
-  p.innerHTML = '<p class="muted">Loading...</p>';
-  try {
-    if (tab === 'overview') return renderOverview(p, await api('/api/admin/summary'));
-    if (tab === 'campaigns') return renderCampaigns(p, await api('/api/admin/campaigns'));
-    if (tab === 'hot') return renderHot(p, await api('/api/admin/hot-leads'));
-    if (tab === 'leads') return renderLeads(p);
-  } catch (e) { p.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
+document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.tab)));
+$('#refresh').addEventListener('click',()=>load());
+function select(t){
+  tab=t;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+  $('#title').textContent=TABS[t][0]; $('#subtitle').textContent=TABS[t][1];
+  load();
 }
 
-function tile(n, l) { return `<div class="tile"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
-function pct(a, b) { return b ? Math.round((a/b)*100) + '%' : '-'; }
-
-function renderOverview(p, s) {
-  p.innerHTML = `<div class="grid">
-    ${tile(s.leads.total, 'Leads')}
-    ${tile(s.leads.engaged, 'Hot leads')}
-    ${tile(s.campaigns.active + '/' + s.campaigns.total, 'Active campaigns')}
-    ${tile(s.enrollments.active, 'In sequence')}
-    ${tile(s.email.sent, 'Emails sent')}
-    ${tile(s.email.opens + ' (' + pct(s.email.opens, s.email.sent) + ')', 'Opens')}
-    ${tile(s.email.clicks + ' (' + pct(s.email.clicks, s.email.sent) + ')', 'Clicks')}
-    ${tile(s.email.replies, 'Replies')}
-    ${tile(s.suppressed, 'Suppressed')}
-    ${tile(s.leads.converted, 'Converted')}
-  </div>`;
+function skeletons(n){return '<div class="kpis">'+Array(n).fill('<div class="skeleton"></div>').join('')+'</div>';}
+function emptyState(title,msg){
+  return `<div class="card"><div class="empty">${icon('<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>')}
+    <h4>${esc(title)}</h4><div>${esc(msg)}</div></div></div>`;
 }
 
-function renderCampaigns(p, data) {
-  const rows = data.rows.map(c => `<tr>
-    <td>${esc(c.name)}</td>
-    <td>${badge(c.status)}</td>
-    <td>${c.steps}</td>
-    <td>${c.enrolled}</td>
-    <td>${c.active}</td>
-    <td>${c.completed}</td>
-    <td>${c.status==='active'
-      ? `<button data-id="${c.id}" data-to="paused">Pause</button>`
-      : `<button class="primary" data-id="${c.id}" data-to="active">Activate</button>`}</td>
+async function load(){
+  const p=$('#panel'); p.innerHTML=skeletons(4);
+  try{
+    if(tab==='overview') return renderOverview(p, await api('/api/admin/summary'));
+    if(tab==='campaigns') return renderCampaigns(p,(await api('/api/admin/campaigns')).rows);
+    if(tab==='hot') return renderHot(p,(await api('/api/admin/hot-leads')).rows);
+    if(tab==='leads') return renderLeads(p);
+  }catch(e){ p.innerHTML=`<div class="err">Couldn't load: ${esc(e.message)}</div>`; }
+}
+
+function kpi(acc,ic,n,l){return `<div class="kpi"><div class="ic acc-${acc}">${icon(ic)}</div><div class="n">${n}</div><div class="l">${l}</div></div>`;}
+
+function renderOverview(p,s){
+  const sent=s.email.sent;
+  const funnelRow=(lab,val)=>`<div class="row"><div class="lab">${lab}</div>
+    <div class="bar"><span style="width:${sent?Math.max(pct(val,sent),2):0}%"></span></div>
+    <div class="val"><b>${num(val)}</b> <span class="pc">${sent?pct(val,sent)+'%':''}</span></div></div>`;
+  p.innerHTML=`
+    <div class="kpis">
+      ${kpi('a','<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',num(s.leads.total),'Total leads')}
+      ${kpi('i','<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',num(s.enrollments.active),'In sequence')}
+      ${kpi('g','<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/>',num(sent),'Emails sent')}
+      ${kpi('a','<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',num(s.email.replies),'Replies')}
+    </div>
+    <div class="cols">
+      <div class="card funnel"><h3>Email funnel</h3>
+        ${funnelRow('Sent',sent)}
+        ${funnelRow('Opened',s.email.opens)}
+        ${funnelRow('Clicked',s.email.clicks)}
+        ${funnelRow('Replied',s.email.replies)}
+      </div>
+      <div class="card"><h3>Pipeline</h3>
+        <div class="mini">
+          <div class="m"><div class="n">${num(s.leads.engaged)}</div><div class="l">Hot leads</div></div>
+          <div class="m"><div class="n">${num(s.campaigns.active)}/${num(s.campaigns.total)}</div><div class="l">Active campaigns</div></div>
+          <div class="m"><div class="n">${num(s.leads.converted)}</div><div class="l">Converted</div></div>
+          <div class="m"><div class="n">${num(s.suppressed)}</div><div class="l">Suppressed</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCampaigns(p,rows){
+  if(!rows.length) return p.innerHTML=emptyState('No campaigns yet','Create a campaign and enroll an audience to start sending.');
+  const body=rows.map(c=>`<tr>
+    <td><b>${esc(c.name)}</b></td><td>${pill(c.status)}</td>
+    <td>${c.steps}</td><td>${num(c.enrolled)}</td><td>${num(c.active)}</td><td>${num(c.completed)}</td>
+    <td style="text-align:right">${c.status==='active'
+      ? `<button class="btn" data-id="${c.id}" data-to="paused">Pause</button>`
+      : `<button class="btn primary" data-id="${c.id}" data-to="active">Activate</button>`}</td>
   </tr>`).join('');
-  p.innerHTML = `<table><thead><tr><th>Campaign</th><th>Status</th><th>Steps</th><th>Enrolled</th><th>Active</th><th>Done</th><th></th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="7" class="muted">No campaigns yet.</td></tr>'}</tbody></table>`;
-  p.querySelectorAll('button[data-id]').forEach(b => b.addEventListener('click', async () => {
-    b.disabled = true;
-    try { await api('/api/admin/campaign-status', { method:'POST', body: JSON.stringify({ id:b.dataset.id, status:b.dataset.to }) });
-      loadTab('campaigns'); } catch(e){ alert(e.message); b.disabled=false; }
+  p.innerHTML=`<table><thead><tr><th>Campaign</th><th>Status</th><th>Steps</th><th>Enrolled</th><th>Active</th><th>Done</th><th></th></tr></thead><tbody>${body}</tbody></table>`;
+  p.querySelectorAll('button[data-id]').forEach(b=>b.addEventListener('click',async()=>{
+    b.disabled=true;
+    try{ await api('/api/admin/campaign-status',{method:'POST',body:JSON.stringify({id:b.dataset.id,status:b.dataset.to})}); load(); }
+    catch(e){ alert(e.message); b.disabled=false; }
   }));
 }
 
-function renderHot(p, data) {
-  const rows = data.rows.map(l => `<tr>
-    <td>${esc([l.first_name,l.last_name].filter(Boolean).join(' ')||'-')}</td>
-    <td>${esc(l.email||'-')}</td>
-    <td>${esc(l.title||'')}</td>
-    <td>${esc(l.organization||'')}</td>
-    <td>${esc(l.state||'')}</td>
-  </tr>`).join('');
-  p.innerHTML = `<p class="muted">Leads who replied with interest - follow up personally.</p>
-    <table><thead><tr><th>Name</th><th>Email</th><th>Title</th><th>Clinic</th><th>State</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="5" class="muted">No hot leads yet.</td></tr>'}</tbody></table>`;
+function renderHot(p,rows){
+  if(!rows.length) return p.innerHTML=emptyState('No hot leads yet','When a lead replies with interest, they show up here for follow-up.');
+  const body=rows.map(l=>`<tr><td><b>${name(l)}</b></td><td>${esc(l.email||'-')}</td><td>${esc(l.title||'')}</td><td>${esc(l.organization||'')}</td><td>${esc(l.state||'')}</td></tr>`).join('');
+  p.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Title</th><th>Clinic</th><th>State</th></tr></thead><tbody>${body}</tbody></table>`;
 }
 
-async function renderLeads(p) {
-  p.innerHTML = `<div class="row">
-    <input id="q" placeholder="Search email / name / clinic" value="${esc(leadState.q)}" />
-    <select id="st">
-      <option value="">All statuses</option>
-      ${['new','active','engaged','converted','unqualified','suppressed'].map(s=>`<option ${leadState.status===s?'selected':''}>${s}</option>`).join('')}
-    </select>
-    <button id="search">Search</button>
-    <span id="count" class="muted"></span>
-  </div><div id="leadTable"></div>
-  <div class="row" style="margin-top:12px"><button id="prev">Prev</button><button id="next">Next</button></div>`;
-  $('#search').addEventListener('click', () => { leadState.q=$('#q').value; leadState.status=$('#st').value; leadState.offset=0; fetchLeads(); });
-  $('#prev').addEventListener('click', () => { leadState.offset=Math.max(0,leadState.offset-50); fetchLeads(); });
-  $('#next').addEventListener('click', () => { leadState.offset+=50; fetchLeads(); });
+function renderLeads(p){
+  p.innerHTML=`<div class="toolbar">
+    <input id="q" placeholder="Search email, name, clinic" value="${esc(leadState.q)}" style="min-width:230px"/>
+    <select id="st">${['','new','active','engaged','converted','unqualified','suppressed'].map(s=>`<option value="${s}" ${leadState.status===s?'selected':''}>${s||'All statuses'}</option>`).join('')}</select>
+    <button class="btn" id="search">Search</button><span class="muted" id="count"></span>
+    </div><div id="leadTable">${skeletons(1)}</div>
+    <div class="toolbar" style="margin-top:14px;justify-content:flex-end"><button class="btn" id="prev">Prev</button><button class="btn" id="next">Next</button></div>`;
+  $('#search').onclick=()=>{leadState.q=$('#q').value;leadState.status=$('#st').value;leadState.offset=0;fetchLeads();};
+  $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')$('#search').click();});
+  $('#prev').onclick=()=>{leadState.offset=Math.max(0,leadState.offset-50);fetchLeads();};
+  $('#next').onclick=()=>{leadState.offset+=50;fetchLeads();};
   fetchLeads();
 }
-
-async function fetchLeads() {
-  const t = $('#leadTable'); if (!t) return;
-  t.innerHTML = '<p class="muted">Loading...</p>';
-  const qs = new URLSearchParams({ limit:50, offset:leadState.offset, status:leadState.status, q:leadState.q });
-  const data = await api('/api/admin/leads?' + qs);
-  const rows = data.rows.map(l => `<tr>
-    <td>${esc([l.first_name,l.last_name].filter(Boolean).join(' ')||'-')}</td>
-    <td>${esc(l.email||'-')}</td>
-    <td>${esc(l.organization||'')}</td>
-    <td>${esc(l.state||'')}</td>
-    <td>${badge(l.status)}</td>
-  </tr>`).join('');
-  t.innerHTML = `<table><thead><tr><th>Name</th><th>Email</th><th>Clinic</th><th>State</th><th>Status</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="5" class="muted">No leads.</td></tr>'}</tbody></table>`;
-  const to = Math.min(leadState.offset+50, data.total);
-  $('#count').textContent = data.total ? `${leadState.offset+1}-${to} of ${data.total}` : '0';
-  $('#prev').disabled = leadState.offset === 0;
-  $('#next').disabled = to >= data.total;
+async function fetchLeads(){
+  const t=$('#leadTable'); if(!t)return; t.innerHTML=skeletons(1);
+  try{
+    const qs=new URLSearchParams({limit:50,offset:leadState.offset,status:leadState.status,q:leadState.q});
+    const d=await api('/api/admin/leads?'+qs);
+    if(!d.rows.length){ t.innerHTML=emptyState('No leads','Import a list to populate the system.'); $('#count').textContent=''; return; }
+    const body=d.rows.map(l=>`<tr><td><b>${name(l)}</b></td><td>${esc(l.email||'-')}</td><td>${esc(l.organization||'')}</td><td>${esc(l.state||'')}</td><td>${pill(l.status)}</td></tr>`).join('');
+    t.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Clinic</th><th>State</th><th>Status</th></tr></thead><tbody>${body}</tbody></table>`;
+    const to=Math.min(leadState.offset+50,d.total);
+    $('#count').textContent=`${leadState.offset+1}-${to} of ${num(d.total)}`;
+    $('#prev').disabled=leadState.offset===0; $('#next').disabled=to>=d.total;
+  }catch(e){ t.innerHTML=`<div class="err">Couldn't load leads: ${esc(e.message)}</div>`; }
 }
 
-// Admin auth disabled: open the dashboard directly, no login.
-showApp();
-loadTab('overview');
+load();
 </script>
 </body>
 </html>
