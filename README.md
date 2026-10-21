@@ -114,6 +114,30 @@ Default model is `claude-opus-5-5`; set `AI_MODEL=claude-sonnet-5-5` or
 `generateAndSendEmail()` ties generation to the tracked, suppression-checked,
 DRY_RUN-safe send.
 
+## Campaigns and the scheduler
+
+A campaign targets an audience and has ordered steps, each with a channel and a
+`delay_minutes` wait. Enroll an audience, then run the scheduler on a cadence:
+
+```
+# enroll a campaign's audience
+node scripts/run-campaigns.js --enroll <campaign-id>
+
+# one tick (run every due step once) - put this on cron
+node scripts/run-campaigns.js
+
+# or loop locally every 60s; --dry-run simulates steps with no AI/send
+node scripts/run-campaigns.js --loop 60 --dry-run
+```
+
+Each tick finds enrollments whose next action is due, runs the current step
+(email generates with the AI and sends through the tracked, capped,
+suppression-checked path; SMS/voice are stubbed until built), and advances the
+enrollment to the next step's fire time or marks it complete. Paused/archived
+campaigns are skipped, suppressed leads drop out, and hitting a channel's daily
+cap stops the tick without losing position. Run one tick per cron invocation in
+production.
+
 ## Status
 
 Day 1 scaffold. No channels wired yet, no data imported. See `docs/roadmap.md`.

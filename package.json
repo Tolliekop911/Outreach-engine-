@@ -1,12 +1,13 @@
 {
   "name": "cowboy-outreach-engine",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "AI-driven lead outreach automation across email, SMS, and voice.",
   "type": "module",
   "scripts": {
     "import-leads": "node scripts/import-leads.js",
-    "server": "node src/server.js"
+    "server": "node src/server.js",
+    "run-campaigns": "node scripts/run-campaigns.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",

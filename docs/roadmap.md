@@ -23,8 +23,10 @@ next year, so the list can be imported and worked automatically from day one.
 - [ ] AI auto-responses with human handoff for hot leads
 
 ## Phase 3 - Pipeline
-- [ ] Campaign sequence builder (multi-step, multi-channel, delays, branching)
-- [ ] Scheduler + throttling honoring daily caps and quiet hours
+- [x] Campaign sequence runner (multi-step, multi-channel, per-step delays)
+- [x] Scheduler tick + enrollment, honoring daily caps and DRY_RUN
+- [ ] Quiet-hours enforcement for SMS/voice steps
+- [ ] Branching on engagement (opened / clicked / replied)
 - [ ] Dashboard: deliverability, replies, call outcomes, conversions
 
 ## Open questions for the user
