@@ -216,8 +216,9 @@ async function fetchLeads() {
   $('#next').disabled = to >= data.total;
 }
 
-// Auto sign-in if a password is already stored this session.
-if (pw) { api('/api/admin/summary').then(() => { showApp(); loadTab('overview'); }).catch(() => showLogin()); }
+// Admin auth disabled: open the dashboard directly, no login.
+showApp();
+loadTab('overview');
 </script>
 </body>
 </html>

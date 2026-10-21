@@ -16,12 +16,14 @@ export function checkAdmin(req) {
   return { ok: true, code: 200, message: 'ok' };
 }
 
-// Guard an admin API handler; writes the error response and returns false when
-// the request is not authorized.
-export function requireAdmin(req, res) {
-  const r = checkAdmin(req);
-  if (!r.ok) { res.status(r.code).json({ error: r.message }); return false; }
+// Admin auth is currently DISABLED by request: the dashboard and its API are
+// open to anyone with the URL. To re-enable, restore the checkAdmin guard below
+// and set ADMIN_PASSWORD in the environment.
+export function requireAdmin(/* req, res */) {
   return true;
+  // const r = checkAdmin(req);
+  // if (!r.ok) { res.status(r.code).json({ error: r.message }); return false; }
+  // return true;
 }
 
 // Vercel parses JSON bodies automatically, but be tolerant of a raw string.
