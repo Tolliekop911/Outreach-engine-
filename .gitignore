@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Purchased lead lists are sensitive PII, never commit them
+data/leads/*
+!data/leads/.gitkeep
+
+*.log
+.DS_Store

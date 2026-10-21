@@ -1,0 +1,10 @@
+{
+  "name": "cowboy-outreach-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-driven lead outreach automation across email, SMS, and voice.",
+  "type": "module",
+  "scripts": {
+    "import-leads": "node scripts/import-leads.js"
+  }
+}

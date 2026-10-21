@@ -1,0 +1,49 @@
+// Central config. Reads from environment; see .env.example for the full list.
+// Everything the engine connects to (AI, phone numbers, email, database) is
+// wired here so the rest of the code never hardcodes a provider or number.
+
+const env = process.env;
+
+function list(value) {
+  return (value || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function int(value, fallback) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+export const config = {
+  ai: {
+    provider: env.AI_PROVIDER || 'anthropic',
+    model: env.AI_MODEL || 'claude-opus-4-8',
+    anthropicApiKey: env.ANTHROPIC_API_KEY || '',
+  },
+  db: {
+    url: env.SUPABASE_URL || '',
+    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || '',
+  },
+  phone: {
+    twilioAccountSid: env.TWILIO_ACCOUNT_SID || '',
+    twilioAuthToken: env.TWILIO_AUTH_TOKEN || '',
+    numbers: list(env.OUTREACH_PHONE_NUMBERS),
+  },
+  email: {
+    provider: env.EMAIL_PROVIDER || '',
+    apiKey: env.EMAIL_API_KEY || '',
+    fromAddress: env.EMAIL_FROM_ADDRESS || '',
+    fromName: env.EMAIL_FROM_NAME || '',
+  },
+  limits: {
+    maxEmailsPerDay: int(env.MAX_EMAILS_PER_DAY, 500),
+    maxSmsPerDay: int(env.MAX_SMS_PER_DAY, 200),
+    maxCallsPerDay: int(env.MAX_CALLS_PER_DAY, 100),
+    // Safety default: nothing actually sends until DRY_RUN is explicitly false.
+    dryRun: env.DRY_RUN !== 'false',
+  },
+};
+
+export default config;
