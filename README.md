@@ -97,6 +97,23 @@ Endpoints: `/t/open/:token.gif`, `/t/click/:token` (302 to the signed target),
 bounce/complaint events -> suppression). Tokens are HMAC-signed with
 `TRACKING_SECRET`; tampered or forged tokens are rejected.
 
+## AI message generation
+
+Claude writes a personalized email per lead. The pitch (sender, product, value
+prop, CTA) lives in config (`OUTREACH_*`), never hardcoded in prompts, so the
+same engine can sell a different product without code changes. Generation:
+
+- builds the prompt from the brand/offer context and the lead's fields
+  (including any `custom` columns) plus optional per-step guidance,
+- returns a subject and an HTML body, parsed defensively from the model,
+- is instructed not to invent facts or add a signature/unsubscribe/footer
+  (the email channel appends those), and handles safety refusals.
+
+Default model is `claude-opus-5-5`; set `AI_MODEL=claude-sonnet-5-5` or
+`claude-haiku-5-5` for cheaper bulk generation. Needs `ANTHROPIC_API_KEY`.
+`generateAndSendEmail()` ties generation to the tracked, suppression-checked,
+DRY_RUN-safe send.
+
 ## Status
 
 Day 1 scaffold. No channels wired yet, no data imported. See `docs/roadmap.md`.

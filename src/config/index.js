@@ -19,8 +19,19 @@ function int(value, fallback) {
 export const config = {
   ai: {
     provider: env.AI_PROVIDER || 'anthropic',
-    model: env.AI_MODEL || 'claude-opus-4-8',
+    model: env.AI_MODEL || 'claude-opus-5-5',
+    effort: env.AI_EFFORT || 'medium',
     anthropicApiKey: env.ANTHROPIC_API_KEY || '',
+  },
+  // The pitch the AI writes from. Kept here, never hardcoded in prompts, so the
+  // same engine can sell a different product without code changes.
+  outreach: {
+    senderName: env.OUTREACH_SENDER_NAME || '',
+    senderTitle: env.OUTREACH_SENDER_TITLE || '',
+    product: env.OUTREACH_PRODUCT || '',
+    valueProp: env.OUTREACH_VALUE_PROP || '',
+    cta: env.OUTREACH_CTA || '',
+    ctaUrl: env.OUTREACH_CTA_URL || '',
   },
   db: {
     url: env.SUPABASE_URL || '',

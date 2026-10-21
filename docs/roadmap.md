@@ -17,7 +17,8 @@ next year, so the list can be imported and worked automatically from day one.
 - [ ] Voice calls / voicemail drops (consent-gated)
 
 ## Phase 2 - AI
-- [ ] AI message generation, personalized per lead
+- [x] AI message generation, personalized per lead (email; Claude)
+- [ ] AI generation for SMS/voice scripts
 - [ ] Inbound reply classification (interested / not / opt-out / question)
 - [ ] AI auto-responses with human handoff for hot leads
 

@@ -1,6 +1,6 @@
 {
   "name": "cowboy-outreach-engine",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "AI-driven lead outreach automation across email, SMS, and voice.",
   "type": "module",
@@ -9,6 +9,7 @@
     "server": "node src/server.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
     "@supabase/supabase-js": "^2.45.4",
     "csv-parse": "^5.5.6",
     "dotenv": "^16.4.5",
