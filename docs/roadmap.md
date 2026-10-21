@@ -7,7 +7,7 @@ next year, so the list can be imported and worked automatically from day one.
 - [x] Project scaffold, config wiring, compliance checklist
 - [ ] Confirm stack (Node + Supabase + Vercel + Twilio) and create Supabase project
 - [ ] Database schema: leads, audiences, campaigns, messages, events, suppression
-- [ ] Lead import script (CSV/XLSX -> clean -> dedupe -> store)
+- [x] Lead import script (CSV/XLSX -> clean -> dedupe -> store)
 
 ## Phase 1 - Channels (one at a time, email first)
 - [ ] Email send + open/click/reply tracking + unsubscribe

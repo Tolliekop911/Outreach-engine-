@@ -58,6 +58,23 @@ Cold outreach to purchased lists is regulated. Before any real send we need:
 
 See `docs/compliance.md` for the working checklist.
 
+## Importing a lead list
+
+Drop the purchased file in `data/leads/` (gitignored), then:
+
+```
+npm install
+node scripts/import-leads.js data/leads/your-list.csv --source "APTA CSM 2027" --dry-run
+```
+
+`--dry-run` cleans and reports counts (mapped columns, junk dropped, duplicates)
+without writing anything or needing credentials. Always dry-run a new list
+first; drop `--dry-run` to write to the database (needs SUPABASE_* in `.env`).
+Supports `.csv`, `.tsv`, and `.xlsx`. Unknown columns are preserved per lead in
+a `custom` JSON field. Rows with no usable email or phone are skipped, and
+duplicates (by email, else phone) are collapsed within the file and against the
+database.
+
 ## Status
 
 Day 1 scaffold. No channels wired yet, no data imported. See `docs/roadmap.md`.
