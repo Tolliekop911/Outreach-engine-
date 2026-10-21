@@ -10,8 +10,9 @@ next year, so the list can be imported and worked automatically from day one.
 - [x] Lead import script (CSV/XLSX -> clean -> dedupe -> store)
 
 ## Phase 1 - Channels (one at a time, email first)
-- [ ] Email send + open/click/reply tracking + unsubscribe
-- [ ] Global suppression list checked before every send
+- [x] Email send + open/click tracking + unsubscribe (console + SendGrid adapters)
+- [x] Global suppression list checked before every send
+- [ ] Inbound reply capture for email (needs inbound-parse / IMAP wiring)
 - [ ] SMS send/receive via our numbers, STOP handling (consent-gated)
 - [ ] Voice calls / voicemail drops (consent-gated)
 

@@ -34,10 +34,16 @@ export const config = {
     numbers: list(env.OUTREACH_PHONE_NUMBERS),
   },
   email: {
-    provider: env.EMAIL_PROVIDER || '',
+    provider: env.EMAIL_PROVIDER || 'console',
     apiKey: env.EMAIL_API_KEY || '',
     fromAddress: env.EMAIL_FROM_ADDRESS || '',
     fromName: env.EMAIL_FROM_NAME || '',
+    postalAddress: env.EMAIL_POSTAL_ADDRESS || '',
+  },
+  tracking: {
+    baseUrl: (env.TRACKING_BASE_URL || '').replace(/\/$/, ''),
+    secret: env.TRACKING_SECRET || '',
+    port: int(env.PORT, 3000),
   },
   limits: {
     maxEmailsPerDay: int(env.MAX_EMAILS_PER_DAY, 500),

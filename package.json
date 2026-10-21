@@ -1,11 +1,12 @@
 {
   "name": "cowboy-outreach-engine",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "AI-driven lead outreach automation across email, SMS, and voice.",
   "type": "module",
   "scripts": {
-    "import-leads": "node scripts/import-leads.js"
+    "import-leads": "node scripts/import-leads.js",
+    "server": "node src/server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

@@ -75,6 +75,28 @@ a `custom` JSON field. Rows with no usable email or phone are skipped, and
 duplicates (by email, else phone) are collapsed within the file and against the
 database.
 
+## Email channel
+
+Provider-agnostic. Set `EMAIL_PROVIDER=console` to log sends with no
+credentials, or `sendgrid` with `EMAIL_API_KEY` to send for real. Every send:
+
+- checks the global suppression list first and skips suppressed addresses,
+- respects `MAX_EMAILS_PER_DAY` and the `DRY_RUN` safety switch,
+- injects an open-tracking pixel, rewrites links through a signed click
+  redirect, and appends a CAN-SPAM footer (postal address + unsubscribe).
+
+Tracking and unsubscribe need the webhook server running and reachable at
+`TRACKING_BASE_URL`:
+
+```
+npm run server
+```
+
+Endpoints: `/t/open/:token.gif`, `/t/click/:token` (302 to the signed target),
+`/u/:token` (one-click unsubscribe -> suppression), `/webhooks/email` (provider
+bounce/complaint events -> suppression). Tokens are HMAC-signed with
+`TRACKING_SECRET`; tampered or forged tokens are rejected.
+
 ## Status
 
 Day 1 scaffold. No channels wired yet, no data imported. See `docs/roadmap.md`.
