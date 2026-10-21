@@ -4,6 +4,7 @@
     "api/tick.js": { "maxDuration": 60 }
   },
   "rewrites": [
+    { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/health", "destination": "/api/health" },
     { "source": "/t/open/:token", "destination": "/api/t/open/:token" },
     { "source": "/t/click/:token", "destination": "/api/t/click/:token" },

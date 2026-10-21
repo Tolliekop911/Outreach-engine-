@@ -169,6 +169,15 @@ matched to a lead, recorded, and classified:
 A genuine human reply always stops the automated sequence so no one keeps
 getting blasted after they respond.
 
+## Admin dashboard
+
+A password-protected admin UI at `/dashboard` (served on the same deployment).
+Set `ADMIN_PASSWORD` in the environment; if unset, the admin API is disabled.
+It shows an overview (leads, hot leads, emails sent, open/click/reply rates,
+suppressed, converted), a searchable/filterable lead list, campaigns with
+enrollment counts and start/pause buttons, and the hot-leads list. The UI calls
+authenticated `/api/admin/*` endpoints (Bearer password, timing-safe check).
+
 ## Deployment (Vercel)
 
 The webhooks run as serverless functions under `api/`, the root shows a small

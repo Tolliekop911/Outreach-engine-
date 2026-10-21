@@ -27,7 +27,8 @@ next year, so the list can be imported and worked automatically from day one.
 - [x] Scheduler tick + enrollment, honoring daily caps and DRY_RUN
 - [ ] Quiet-hours enforcement for SMS/voice steps
 - [ ] Branching on engagement (opened / clicked / replied)
-- [ ] Dashboard: deliverability, replies, call outcomes, conversions
+- [x] Admin dashboard: leads, campaigns, opens/clicks/replies, hot leads, start/pause
+- [ ] Dashboard: call outcomes and conversion attribution (after SMS/voice)
 
 ## Open questions for the user
 - Which email sending provider do we use? (deliverability for cold outreach matters)

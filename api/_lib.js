@@ -1,4 +1,28 @@
 // Shared helpers for the Vercel serverless functions.
+import crypto from 'node:crypto';
+
+// Check the admin password sent as `Authorization: Bearer <ADMIN_PASSWORD>`.
+// Returns { ok, code, message }. Timing-safe compare; denies if unconfigured.
+export function checkAdmin(req) {
+  const expected = process.env.ADMIN_PASSWORD || '';
+  if (!expected) return { ok: false, code: 503, message: 'admin not configured' };
+  const auth = req.headers?.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const a = Buffer.from(token);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    return { ok: false, code: 401, message: 'unauthorized' };
+  }
+  return { ok: true, code: 200, message: 'ok' };
+}
+
+// Guard an admin API handler; writes the error response and returns false when
+// the request is not authorized.
+export function requireAdmin(req, res) {
+  const r = checkAdmin(req);
+  if (!r.ok) { res.status(r.code).json({ error: r.message }); return false; }
+  return true;
+}
 
 // Vercel parses JSON bodies automatically, but be tolerant of a raw string.
 export function jsonBody(req) {

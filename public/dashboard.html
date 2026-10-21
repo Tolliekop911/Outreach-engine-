@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Outreach Admin</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #1a1d21; --muted: #6b7280;
+    --border: #e5e7eb; --accent: #2563eb; --good: #16a34a; --warn: #b45309; --bad: #dc2626;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1216; --card:#171b21; --text:#e6e8eb; --muted:#9aa4b2; --border:#262c36; --accent:#4f86ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--card); position:sticky; top:0; }
+  header h1 { font-size:16px; margin:0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  button { font: inherit; cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--text); padding:6px 12px; border-radius:8px; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button:disabled { opacity:.5; cursor:default; }
+  input, select { font: inherit; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); }
+  .tabs { display:flex; gap:6px; margin:16px 0; flex-wrap:wrap; }
+  .tabs button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+  .tile { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+  .tile .n { font-size:26px; font-weight:700; }
+  .tile .l { color:var(--muted); font-size:12px; margin-top:4px; text-transform:uppercase; letter-spacing:.03em; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); font-size:14px; }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; }
+  tr:last-child td { border-bottom:none; }
+  .badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); }
+  .b-active{ color:var(--good); border-color:var(--good); }
+  .b-paused{ color:var(--warn); border-color:var(--warn); }
+  .b-engaged{ color:var(--accent); border-color:var(--accent); }
+  .b-suppressed{ color:var(--bad); border-color:var(--bad); }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  .muted { color:var(--muted); }
+  .center { min-height:70vh; display:flex; align-items:center; justify-content:center; }
+  .login { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; width:320px; max-width:90vw; }
+  .login h2 { margin:0 0 12px; }
+  .err { color:var(--bad); font-size:13px; min-height:18px; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+
+<div id="loginView" class="center">
+  <form class="login" id="loginForm">
+    <h2>Outreach Admin</h2>
+    <p class="muted" style="margin-top:0;font-size:13px">Enter the admin password.</p>
+    <input id="pw" type="password" placeholder="Password" style="width:100%;margin-bottom:10px" autocomplete="current-password" />
+    <button class="primary" type="submit" style="width:100%">Sign in</button>
+    <p class="err" id="loginErr"></p>
+  </form>
+</div>
+
+<div id="appView" class="hide">
+  <header>
+    <h1>Cowboy Outreach - Admin</h1>
+    <button id="logout">Sign out</button>
+  </header>
+  <div class="wrap">
+    <div class="tabs">
+      <button data-tab="overview" class="active">Overview</button>
+      <button data-tab="leads">Leads</button>
+      <button data-tab="campaigns">Campaigns</button>
+      <button data-tab="hot">Hot leads</button>
+    </div>
+    <div id="panel"></div>
+  </div>
+</div>
+
+<script>
+const PW_KEY = 'outreach_admin_pw';
+let pw = sessionStorage.getItem(PW_KEY) || '';
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'Authorization': 'Bearer ' + pw, 'Content-Type': 'application/json', ...(opts.headers||{}) },
+  });
+  if (res.status === 401 || res.status === 503) { logout(); throw new Error('unauthorized'); }
+  if (!res.ok) throw new Error((await res.json().catch(()=>({})))?.error || ('HTTP ' + res.status));
+  return res.json();
+}
+
+const $ = (s) => document.querySelector(s);
+const el = (h) => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
+const esc = (s) => String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const badge = (s) => `<span class="badge b-${esc(s)}">${esc(s)}</span>`;
+
+function showApp() { $('#loginView').classList.add('hide'); $('#appView').classList.remove('hide'); }
+function showLogin() { $('#appView').classList.add('hide'); $('#loginView').classList.remove('hide'); }
+function logout() { pw=''; sessionStorage.removeItem(PW_KEY); showLogin(); }
+
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  pw = $('#pw').value;
+  $('#loginErr').textContent = '';
+  try {
+    await api('/api/admin/summary');
+    sessionStorage.setItem(PW_KEY, pw);
+    showApp(); loadTab('overview');
+  } catch { $('#loginErr').textContent = 'Wrong password or server not configured.'; pw=''; }
+});
+$('#logout').addEventListener('click', logout);
+
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  loadTab(b.dataset.tab);
+}));
+
+let leadState = { offset: 0, status: '', q: '' };
+
+async function loadTab(tab) {
+  const p = $('#panel');
+  p.innerHTML = '<p class="muted">Loading...</p>';
+  try {
+    if (tab === 'overview') return renderOverview(p, await api('/api/admin/summary'));
+    if (tab === 'campaigns') return renderCampaigns(p, await api('/api/admin/campaigns'));
+    if (tab === 'hot') return renderHot(p, await api('/api/admin/hot-leads'));
+    if (tab === 'leads') return renderLeads(p);
+  } catch (e) { p.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
+}
+
+function tile(n, l) { return `<div class="tile"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+function pct(a, b) { return b ? Math.round((a/b)*100) + '%' : '-'; }
+
+function renderOverview(p, s) {
+  p.innerHTML = `<div class="grid">
+    ${tile(s.leads.total, 'Leads')}
+    ${tile(s.leads.engaged, 'Hot leads')}
+    ${tile(s.campaigns.active + '/' + s.campaigns.total, 'Active campaigns')}
+    ${tile(s.enrollments.active, 'In sequence')}
+    ${tile(s.email.sent, 'Emails sent')}
+    ${tile(s.email.opens + ' (' + pct(s.email.opens, s.email.sent) + ')', 'Opens')}
+    ${tile(s.email.clicks + ' (' + pct(s.email.clicks, s.email.sent) + ')', 'Clicks')}
+    ${tile(s.email.replies, 'Replies')}
+    ${tile(s.suppressed, 'Suppressed')}
+    ${tile(s.leads.converted, 'Converted')}
+  </div>`;
+}
+
+function renderCampaigns(p, data) {
+  const rows = data.rows.map(c => `<tr>
+    <td>${esc(c.name)}</td>
+    <td>${badge(c.status)}</td>
+    <td>${c.steps}</td>
+    <td>${c.enrolled}</td>
+    <td>${c.active}</td>
+    <td>${c.completed}</td>
+    <td>${c.status==='active'
+      ? `<button data-id="${c.id}" data-to="paused">Pause</button>`
+      : `<button class="primary" data-id="${c.id}" data-to="active">Activate</button>`}</td>
+  </tr>`).join('');
+  p.innerHTML = `<table><thead><tr><th>Campaign</th><th>Status</th><th>Steps</th><th>Enrolled</th><th>Active</th><th>Done</th><th></th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="7" class="muted">No campaigns yet.</td></tr>'}</tbody></table>`;
+  p.querySelectorAll('button[data-id]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true;
+    try { await api('/api/admin/campaign-status', { method:'POST', body: JSON.stringify({ id:b.dataset.id, status:b.dataset.to }) });
+      loadTab('campaigns'); } catch(e){ alert(e.message); b.disabled=false; }
+  }));
+}
+
+function renderHot(p, data) {
+  const rows = data.rows.map(l => `<tr>
+    <td>${esc([l.first_name,l.last_name].filter(Boolean).join(' ')||'-')}</td>
+    <td>${esc(l.email||'-')}</td>
+    <td>${esc(l.title||'')}</td>
+    <td>${esc(l.organization||'')}</td>
+    <td>${esc(l.state||'')}</td>
+  </tr>`).join('');
+  p.innerHTML = `<p class="muted">Leads who replied with interest - follow up personally.</p>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Title</th><th>Clinic</th><th>State</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="5" class="muted">No hot leads yet.</td></tr>'}</tbody></table>`;
+}
+
+async function renderLeads(p) {
+  p.innerHTML = `<div class="row">
+    <input id="q" placeholder="Search email / name / clinic" value="${esc(leadState.q)}" />
+    <select id="st">
+      <option value="">All statuses</option>
+      ${['new','active','engaged','converted','unqualified','suppressed'].map(s=>`<option ${leadState.status===s?'selected':''}>${s}</option>`).join('')}
+    </select>
+    <button id="search">Search</button>
+    <span id="count" class="muted"></span>
+  </div><div id="leadTable"></div>
+  <div class="row" style="margin-top:12px"><button id="prev">Prev</button><button id="next">Next</button></div>`;
+  $('#search').addEventListener('click', () => { leadState.q=$('#q').value; leadState.status=$('#st').value; leadState.offset=0; fetchLeads(); });
+  $('#prev').addEventListener('click', () => { leadState.offset=Math.max(0,leadState.offset-50); fetchLeads(); });
+  $('#next').addEventListener('click', () => { leadState.offset+=50; fetchLeads(); });
+  fetchLeads();
+}
+
+async function fetchLeads() {
+  const t = $('#leadTable'); if (!t) return;
+  t.innerHTML = '<p class="muted">Loading...</p>';
+  const qs = new URLSearchParams({ limit:50, offset:leadState.offset, status:leadState.status, q:leadState.q });
+  const data = await api('/api/admin/leads?' + qs);
+  const rows = data.rows.map(l => `<tr>
+    <td>${esc([l.first_name,l.last_name].filter(Boolean).join(' ')||'-')}</td>
+    <td>${esc(l.email||'-')}</td>
+    <td>${esc(l.organization||'')}</td>
+    <td>${esc(l.state||'')}</td>
+    <td>${badge(l.status)}</td>
+  </tr>`).join('');
+  t.innerHTML = `<table><thead><tr><th>Name</th><th>Email</th><th>Clinic</th><th>State</th><th>Status</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="5" class="muted">No leads.</td></tr>'}</tbody></table>`;
+  const to = Math.min(leadState.offset+50, data.total);
+  $('#count').textContent = data.total ? `${leadState.offset+1}-${to} of ${data.total}` : '0';
+  $('#prev').disabled = leadState.offset === 0;
+  $('#next').disabled = to >= data.total;
+}
+
+// Auto sign-in if a password is already stored this session.
+if (pw) { api('/api/admin/summary').then(() => { showApp(); loadTab('overview'); }).catch(() => showLogin()); }
+</script>
+</body>
+</html>
