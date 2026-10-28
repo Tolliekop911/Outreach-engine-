@@ -110,6 +110,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3zM11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Campaigns</button>
       <button data-tab="hot">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Hot leads</button>
+      <button data-tab="activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Activity</button>
     </nav>
   </aside>
   <main class="main">
@@ -142,6 +144,7 @@ const TABS={
   leads:['Leads','Everyone in the system'],
   campaigns:['Campaigns','Sequences and their progress'],
   hot:['Hot leads','Interested replies to follow up personally'],
+  activity:['Activity','Every message sent and received, and engagement events'],
 };
 let tab='overview';
 const leadState={offset:0,status:'',q:''};
@@ -167,6 +170,7 @@ async function load(){
     if(tab==='overview') return renderOverview(p, await api('/api/admin/summary'));
     if(tab==='campaigns') return renderCampaigns(p,(await api('/api/admin/campaigns')).rows);
     if(tab==='hot') return renderHot(p,(await api('/api/admin/hot-leads')).rows);
+    if(tab==='activity') return renderActivity(p, await api('/api/admin/activity'));
     if(tab==='leads') return renderLeads(p);
   }catch(e){ p.innerHTML=`<div class="err">Couldn't load: ${esc(e.message)}</div>`; }
 }
@@ -224,6 +228,32 @@ function renderHot(p,rows){
   if(!rows.length) return p.innerHTML=emptyState('No hot leads yet','When a lead replies with interest, they show up here for follow-up.');
   const body=rows.map(l=>`<tr><td><b>${name(l)}</b></td><td>${esc(l.email||'-')}</td><td>${esc(l.title||'')}</td><td>${esc(l.organization||'')}</td><td>${esc(l.state||'')}</td></tr>`).join('');
   p.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Title</th><th>Clinic</th><th>State</th></tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function fmtTime(t){ if(!t) return ''; const d=new Date(t); return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function leadLabel(r){ const l=r.leads||{}; return esc([l.first_name,l.last_name].filter(Boolean).join(' ')||l.email||'-'); }
+
+function renderActivity(p,data){
+  const msgs=data.messages||[], evs=data.events||[];
+  const mbody=msgs.map(m=>`<tr>
+    <td>${pill(m.direction==='inbound'?'new':'active')}${m.direction}</td>
+    <td>${esc(m.channel)}</td>
+    <td>${esc(m.to_address||(m.leads&&m.leads.email)||'-')}</td>
+    <td>${esc(m.subject||'')}</td>
+    <td>${pill(m.status)}</td>
+    <td class="muted">${fmtTime(m.sent_at||m.created_at)}</td></tr>`).join('');
+  const ebody=evs.map(e=>`<tr>
+    <td><b>${esc(e.event_type)}</b></td>
+    <td>${leadLabel(e)}</td>
+    <td class="muted">${fmtTime(e.occurred_at)}</td></tr>`).join('');
+  p.innerHTML=`
+    <div class="card" style="margin-bottom:14px"><h3>Messages (${msgs.length})</h3>
+      ${msgs.length?`<table><thead><tr><th>Dir</th><th>Channel</th><th>To</th><th>Subject</th><th>Status</th><th>When</th></tr></thead><tbody>${mbody}</tbody></table>`
+        :`<div class="empty"><h4>No messages yet</h4><div>Messages the engine sends and receives show here.</div></div>`}</div>
+    <div class="card"><h3>Engagement events (${evs.length})</h3>
+      ${evs.length?`<table><thead><tr><th>Event</th><th>Lead</th><th>When</th></tr></thead><tbody>${ebody}</tbody></table>`
+        :`<div class="empty"><h4>No events yet</h4><div>Opens, clicks, replies and opt-outs appear here.</div></div>`}
+      <p class="muted" style="margin:12px 2px 0;font-size:12px">SMS and call logs will appear here once the phone channels are built.</p></div>`;
 }
 
 function renderLeads(p){

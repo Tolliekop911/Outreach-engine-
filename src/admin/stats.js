@@ -93,6 +93,24 @@ export async function listHotLeads({ limit = 50 } = {}) {
   return data;
 }
 
+// Recent activity: outbound/inbound messages and engagement events, each with
+// the lead's email. This is "what the AI did" for email (SMS/voice logs appear
+// here once those channels are built).
+export async function listActivity({ limit = 60 } = {}) {
+  const db = getDb();
+  const [msgRes, evRes] = await Promise.all([
+    db.from('messages')
+      .select('id, channel, direction, status, subject, to_address, sent_at, created_at, leads(email, first_name, last_name)')
+      .order('created_at', { ascending: false }).limit(limit),
+    db.from('message_events')
+      .select('event_type, occurred_at, detail, leads(email, first_name, last_name)')
+      .order('occurred_at', { ascending: false }).limit(limit),
+  ]);
+  if (msgRes.error) throw new Error(`messages: ${msgRes.error.message}`);
+  if (evRes.error) throw new Error(`events: ${evRes.error.message}`);
+  return { messages: msgRes.data, events: evRes.data };
+}
+
 export async function setCampaignStatus(id, status) {
   if (!validateCampaignStatus(status)) throw new Error(`invalid status: ${status}`);
   const db = getDb();
