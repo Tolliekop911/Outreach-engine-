@@ -9,6 +9,7 @@ import {
   getSummary, listLeads, listCampaigns, listHotLeads, listActivity,
   setCampaignStatus, validateCampaignStatus,
 } from '../../src/admin/stats.js';
+import { importCsvText } from '../../src/leads/import.js';
 
 function keyRole(k) {
   if (!k) return 'MISSING';
@@ -51,13 +52,23 @@ export default async function handler(req, res) {
           serviceKeyRole: keyRole(config.db.serviceRoleKey),
           hasAnthropicKey: !!config.ai.anthropicApiKey,
           emailProvider: config.email.provider,
+          fromAddress: config.email.fromAddress || '(not set)',
+          smtpUser: config.email.smtp.user || '(not set)',
           dryRun: config.limits.dryRun,
+          maxEmailsPerDay: config.limits.maxEmailsPerDay,
         };
         try {
           const { count, error } = await getDb().from('leads').select('*', { count: 'exact', head: true });
           out.leadCount = error ? ('ERROR: ' + error.message) : count;
         } catch (e) { out.leadCount = 'ERROR: ' + e.message; }
         return res.status(200).json(out);
+      }
+      case 'import': {
+        if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
+        const b = jsonBody(req) || {};
+        if (!b.csv || typeof b.csv !== 'string') return res.status(400).json({ error: 'need { csv, sourceName }' });
+        const result = await importCsvText(b.csv, { sourceName: b.sourceName || 'Uploaded list' });
+        return res.status(200).json(result);
       }
       case 'campaign-status': {
         if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });

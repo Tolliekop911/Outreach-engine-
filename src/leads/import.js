@@ -62,18 +62,26 @@ async function loadExistingKeys(db) {
   return keys;
 }
 
+// Parse raw CSV/TSV text (e.g. from a browser upload) into rows + headers.
+export function parseCsvText(text, delimiter = ',') {
+  const records = parse(text, {
+    columns: true, skip_empty_lines: true, trim: true, bom: true,
+    delimiter, relax_column_count: true,
+  });
+  return { rows: records, headers: records.length ? Object.keys(records[0]) : [] };
+}
+
 // --- Main entry -------------------------------------------------------------
 
 /**
- * @param {string} filePath  Path to the CSV/XLSX list.
- * @param {object} opts
- * @param {string} [opts.sourceName]  Label for this batch (e.g. "APTA CSM 2027").
- * @param {boolean} [opts.dryRun]     Parse and report only; write nothing.
+ * Clean, dedupe, and store already-parsed rows. Shared by the CLI (file) and
+ * the dashboard uploader (CSV text).
+ * @param {object[]} rows     Row objects keyed by source header.
+ * @param {string[]} headers  Source headers.
+ * @param {object} opts { sourceName, dryRun }
  */
-export async function importLeads(filePath, opts = {}) {
-  const { sourceName = path.basename(filePath), dryRun = false } = opts;
-
-  const { rows, headers } = readRows(filePath);
+export async function storeRows(rows, headers, opts = {}) {
+  const { sourceName = 'Imported list', dryRun = false } = opts;
   const { mapping, unmapped } = buildHeaderMapping(headers);
 
   const stats = {
@@ -145,6 +153,23 @@ export async function importLeads(filePath, opts = {}) {
   }
 
   return result;
+}
+
+/**
+ * Read a CSV/XLSX file and store it (CLI path).
+ */
+export async function importLeads(filePath, opts = {}) {
+  const { rows, headers } = readRows(filePath);
+  return storeRows(rows, headers, { sourceName: path.basename(filePath), ...opts });
+}
+
+/**
+ * Import from raw CSV/TSV text (dashboard upload path).
+ */
+export async function importCsvText(text, opts = {}) {
+  const delimiter = opts.delimiter || (text.indexOf('\t') > -1 && text.indexOf(',') === -1 ? '\t' : ',');
+  const { rows, headers } = parseCsvText(text, delimiter);
+  return storeRows(rows, headers, opts);
 }
 
 export default importLeads;

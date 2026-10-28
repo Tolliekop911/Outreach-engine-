@@ -1,6 +1,6 @@
 {
   "name": "cowboy-outreach-engine",
-  "version": "0.12.2",
+  "version": "0.13.0",
   "private": true,
   "description": "AI-driven lead outreach automation across email, SMS, and voice.",
   "type": "module",

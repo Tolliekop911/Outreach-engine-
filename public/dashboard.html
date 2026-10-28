@@ -262,14 +262,36 @@ function renderLeads(p){
   p.innerHTML=`<div class="toolbar">
     <input id="q" placeholder="Search email, name, clinic" value="${esc(leadState.q)}" style="min-width:230px"/>
     <select id="st">${['','new','active','engaged','converted','unqualified','suppressed'].map(s=>`<option value="${s}" ${leadState.status===s?'selected':''}>${s||'All statuses'}</option>`).join('')}</select>
-    <button class="btn" id="search">Search</button><span class="muted" id="count"></span>
+    <button class="btn" id="search">Search</button>
+    <button class="btn primary" id="importBtn">Import CSV</button>
+    <input type="file" id="csvFile" accept=".csv,.tsv,text/csv" style="display:none"/>
+    <span class="muted" id="count"></span><span id="importMsg" class="muted"></span>
     </div><div id="leadTable">${skeletons(1)}</div>
     <div class="toolbar" style="margin-top:14px;justify-content:flex-end"><button class="btn" id="prev">Prev</button><button class="btn" id="next">Next</button></div>`;
   $('#search').onclick=()=>{leadState.q=$('#q').value;leadState.status=$('#st').value;leadState.offset=0;fetchLeads();};
   $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')$('#search').click();});
   $('#prev').onclick=()=>{leadState.offset=Math.max(0,leadState.offset-50);fetchLeads();};
   $('#next').onclick=()=>{leadState.offset+=50;fetchLeads();};
+  $('#importBtn').onclick=()=>$('#csvFile').click();
+  $('#csvFile').onchange=uploadCsv;
   fetchLeads();
+}
+
+async function uploadCsv(e){
+  const file=e.target.files[0]; if(!file) return;
+  const sourceName=prompt('Name this list (e.g. "APTA CSM 2027"):', file.name.replace(/\.[^.]+$/,''));
+  if(sourceName===null){ e.target.value=''; return; }
+  const msg=$('#importMsg'); msg.textContent=' Reading file...';
+  try{
+    const csv=await file.text();
+    if(csv.length>4_000_000){ msg.textContent=' File too large for upload (~4MB max). Split it or use the import script for 15k lists.'; e.target.value=''; return; }
+    msg.textContent=' Importing...';
+    const r=await api('/api/admin/import',{method:'POST',body:JSON.stringify({csv,sourceName})});
+    const s=r.stats||{};
+    msg.textContent=` Imported ${s.inserted||0} (skipped ${(s.unreachable||0)+(s.dupInFile||0)+(s.dupInDb||0)}: ${s.unreachable||0} no contact, ${s.dupInFile||0} dup in file, ${s.dupInDb||0} already here).`;
+    leadState.offset=0; fetchLeads();
+  }catch(err){ msg.textContent=' Import failed: '+err.message; }
+  e.target.value='';
 }
 async function fetchLeads(){
   const t=$('#leadTable'); if(!t)return; t.innerHTML=skeletons(1);
