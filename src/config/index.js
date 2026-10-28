@@ -66,6 +66,13 @@ export const config = {
       pass: env.SMTP_PASS || '',
     },
   },
+  // AI voice calls via Bland AI (bland.ai). Used when EMAIL_PROVIDER-style voice
+  // steps run. Needs BLAND_API_KEY; from-number must be a Bland-provisioned number.
+  voice: {
+    blandApiKey: env.BLAND_API_KEY || '',
+    fromNumber: env.OUTREACH_CALL_FROM || '',
+    voice: env.BLAND_VOICE || '',
+  },
   tracking: {
     baseUrl: (env.TRACKING_BASE_URL || '').replace(/\/$/, ''),
     secret: env.TRACKING_SECRET || '',

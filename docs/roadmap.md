@@ -14,7 +14,7 @@ next year, so the list can be imported and worked automatically from day one.
 - [x] Global suppression list checked before every send
 - [ ] Inbound reply capture for email (needs inbound-parse / IMAP wiring)
 - [x] SMS send (Twilio) + AI copy + STOP opt-out handling (inbound webhook)
-- [ ] Voice calls / voicemail drops (consent-gated)
+- [x] AI voice calls via Bland AI (task from pitch, suppression/cap, outcome webhook)
 
 ## Phase 2 - AI
 - [x] AI message generation, personalized per lead (email; Claude)

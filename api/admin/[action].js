@@ -12,6 +12,7 @@ import {
 import { importCsvText } from '../../src/leads/import.js';
 import { generateAndSendEmail } from '../../src/channels/email/aiSend.js';
 import { generateAndSendSms } from '../../src/channels/sms/aiSend.js';
+import { callLead } from '../../src/channels/voice/call.js';
 
 function keyRole(k) {
   if (!k) return 'MISSING';
@@ -110,6 +111,24 @@ export default async function handler(req, res) {
           lead = ins.data;
         }
         return res.status(200).json(await generateAndSendSms({ lead, stepPrompt: 'A short, friendly test text.' }));
+      }
+      case 'send-call-test': {
+        if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
+        const b = jsonBody(req) || {};
+        const phone = String(b.phone || '').trim();
+        if (!/^\+?[0-9]{10,15}$/.test(phone.replace(/[\s()-]/g, ''))) {
+          return res.status(400).json({ error: 'valid phone (E.164) required' });
+        }
+        const db = getDb();
+        const found = await db.from('leads').select('*').eq('phone', phone).limit(1);
+        let lead = found.data && found.data[0];
+        if (!lead) {
+          const ins = await db.from('leads')
+            .insert({ phone, first_name: 'Test', status: 'new' }).select('*').single();
+          if (ins.error) return res.status(500).json({ error: ins.error.message });
+          lead = ins.data;
+        }
+        return res.status(200).json(await callLead({ lead, stepPrompt: 'A short, friendly test call.' }));
       }
       case 'sms-status': {
         const db = getDb();

@@ -3,6 +3,7 @@
 // suppression-checked, DRY_RUN-safe path. SMS and voice are not built yet.
 import { generateAndSendEmail } from '../channels/email/aiSend.js';
 import { generateAndSendSms } from '../channels/sms/aiSend.js';
+import { callLead } from '../channels/voice/call.js';
 
 export async function runStep({ lead, step, campaignId }, opts = {}) {
   const { dryRun = false } = opts;
@@ -23,7 +24,7 @@ export async function runStep({ lead, step, campaignId }, opts = {}) {
         lead, stepPrompt: step.prompt, campaignId, stepId: step.id,
       });
     case 'voice':
-      return { ok: true, skipped: true, reason: 'channel_not_implemented:voice' };
+      return callLead({ lead, stepPrompt: step.prompt, campaignId, stepId: step.id });
     default:
       return { ok: false, skipped: true, reason: `unknown_channel:${step.channel}` };
   }
