@@ -10,6 +10,7 @@ import {
   setCampaignStatus, validateCampaignStatus,
 } from '../../src/admin/stats.js';
 import { importCsvText } from '../../src/leads/import.js';
+import { generateAndSendEmail } from '../../src/channels/email/aiSend.js';
 
 function keyRole(k) {
   if (!k) return 'MISSING';
@@ -68,6 +69,27 @@ export default async function handler(req, res) {
         const b = jsonBody(req) || {};
         if (!b.csv || typeof b.csv !== 'string') return res.status(400).json({ error: 'need { csv, sourceName }' });
         const result = await importCsvText(b.csv, { sourceName: b.sourceName || 'Uploaded list' });
+        return res.status(200).json(result);
+      }
+      case 'send-test': {
+        if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
+        const b = jsonBody(req) || {};
+        const email = String(b.email || '').trim().toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          return res.status(400).json({ error: 'valid email required' });
+        }
+        const db = getDb();
+        const found = await db.from('leads').select('*').eq('email', email).limit(1);
+        let lead = found.data && found.data[0];
+        if (!lead) {
+          const ins = await db.from('leads')
+            .insert({ email, first_name: 'Test', status: 'new' }).select('*').single();
+          if (ins.error) return res.status(500).json({ error: ins.error.message });
+          lead = ins.data;
+        }
+        const result = await generateAndSendEmail({
+          lead, stepPrompt: 'A short, friendly test email introducing the product.',
+        });
         return res.status(200).json(result);
       }
       case 'campaign-status': {

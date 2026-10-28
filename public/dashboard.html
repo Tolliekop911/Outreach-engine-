@@ -119,7 +119,10 @@
   <main class="main">
     <div class="topbar">
       <div><h2 id="title">Overview</h2><div class="sub" id="subtitle">Campaign performance at a glance</div></div>
-      <button class="btn ghost" id="refresh">Refresh</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="testEmail">Send test email</button>
+        <button class="btn ghost" id="refresh">Refresh</button>
+      </div>
     </div>
     <div class="content" id="panel"></div>
   </main>
@@ -153,6 +156,19 @@ const leadState={offset:0,status:'',q:''};
 
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.tab)));
 $('#refresh').addEventListener('click',()=>load());
+$('#testEmail').addEventListener('click',async()=>{
+  const email=prompt('Send ONE real test email to:', 'snyman4d@gmail.com');
+  if(!email) return;
+  const b=$('#testEmail'); const t=b.textContent; b.disabled=true; b.textContent='Sending...';
+  try{
+    const r=await api('/api/admin/send-test',{method:'POST',body:JSON.stringify({email})});
+    if(r.sent) alert('Sent to '+email+' (message id '+r.messageId+'). Check the inbox.');
+    else if(r.dryRun) alert('DRY_RUN is ON, so nothing was actually sent. Set DRY_RUN=false in Vercel to send for real.');
+    else alert('Not sent: '+(r.reason||JSON.stringify(r)));
+    load();
+  }catch(e){ alert('Failed: '+e.message+'\n\nIf it mentions authentication/api key, add ANTHROPIC_API_KEY in Vercel and redeploy.'); }
+  finally{ b.disabled=false; b.textContent=t; }
+});
 function select(t){
   tab=t;
   document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
