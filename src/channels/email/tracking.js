@@ -83,6 +83,28 @@ function pixelTag(messageId) {
   return `<img src="${url}" width="1" height="1" alt="" style="display:none" />`;
 }
 
+// Fixed signature block, consistent on every email, built from config.
+function signature() {
+  const o = config.outreach;
+  const web = o.website
+    ? (o.website.startsWith('http') ? o.website : `https://${o.website}`)
+    : '';
+  const contact = [];
+  if (o.phone) contact.push(`Phone: ${escapeHtml(o.phone)}`);
+  if (web) contact.push(`Website: <a href="${web}">${escapeHtml(o.website)}</a>`);
+  if (config.email.fromAddress) {
+    contact.push(`Email: <a href="mailto:${config.email.fromAddress}">${escapeHtml(config.email.fromAddress)}</a>`);
+  }
+  return (
+    `<div style="margin-top:22px;font-size:14px;color:#333">` +
+    `<div>Best regards,</div>` +
+    (o.signatureName ? `<div><strong>${escapeHtml(o.signatureName)}</strong></div>` : '') +
+    (o.signatureTagline ? `<div>${escapeHtml(o.signatureTagline)}</div>` : '') +
+    (contact.length ? `<div style="margin-top:8px">${contact.join('<br>')}</div>` : '') +
+    `</div>`
+  );
+}
+
 function footer(messageId, leadId, email) {
   const unsub = unsubscribeUrl(messageId, leadId, email);
   const addr = config.email.postalAddress || '[postal address not configured]';
@@ -103,5 +125,5 @@ function escapeHtml(s) {
 // open pixel appended last.
 export function renderTrackedHtml({ html, messageId, leadId, email }) {
   const wrapped = rewriteLinks(html, messageId);
-  return `${wrapped}\n${footer(messageId, leadId, email)}\n${pixelTag(messageId)}`;
+  return `${wrapped}\n${signature()}\n${footer(messageId, leadId, email)}\n${pixelTag(messageId)}`;
 }

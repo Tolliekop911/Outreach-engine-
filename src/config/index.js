@@ -34,6 +34,11 @@ export const config = {
     ctaUrl: env.OUTREACH_CTA_URL || '',
     // Where hot-lead handoffs are emailed for human follow-up (optional).
     handoffEmail: env.OUTREACH_HANDOFF_EMAIL || '',
+    // Fixed signature appended to every email (the AI does not write its own).
+    signatureName: env.OUTREACH_SIGNATURE_NAME || env.OUTREACH_SENDER_NAME || 'Cowboy Systems',
+    signatureTagline: env.OUTREACH_SIGNATURE_TAGLINE || 'All-in-One Software for Allied Health Businesses',
+    phone: env.OUTREACH_PHONE || '(234) 279-2085',
+    website: env.OUTREACH_WEBSITE || 'www.cowboy-systems.com',
   },
   db: {
     url: env.SUPABASE_URL || '',
