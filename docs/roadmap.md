@@ -13,7 +13,7 @@ next year, so the list can be imported and worked automatically from day one.
 - [x] Email send + open/click tracking + unsubscribe (console + SendGrid adapters)
 - [x] Global suppression list checked before every send
 - [ ] Inbound reply capture for email (needs inbound-parse / IMAP wiring)
-- [ ] SMS send/receive via our numbers, STOP handling (consent-gated)
+- [x] SMS send (Twilio) + AI copy + STOP opt-out handling (inbound webhook)
 - [ ] Voice calls / voicemail drops (consent-gated)
 
 ## Phase 2 - AI
