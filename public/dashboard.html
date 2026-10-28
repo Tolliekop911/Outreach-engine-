@@ -20,6 +20,7 @@
       --shadow:0 1px 2px rgba(0,0,0,.4); }
   }
   *{box-sizing:border-box}
+  html,body{max-width:100%;overflow-x:hidden}
   body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
   a{color:var(--accent)}
   .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
@@ -31,11 +32,12 @@
   .nav button:hover{background:var(--panel2);color:var(--text)}
   .nav button.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
   .nav svg{width:17px;height:17px;flex:none}
-  .main{min-width:0}
+  .main{min-width:0;overflow-x:hidden}
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--border);background:var(--panel)}
   .topbar h2{margin:0;font-size:17px}
   .topbar .sub{color:var(--muted);font-size:13px;margin-top:2px}
-  .content{padding:22px 26px;max-width:1120px}
+  .content{padding:22px 32px;width:100%;max-width:1500px}
+  .tablewrap{overflow-x:auto}
   .btn{font:inherit;cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--text);padding:7px 13px;border-radius:9px;box-shadow:var(--shadow)}
   .btn:hover{border-color:var(--muted)}
   .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
