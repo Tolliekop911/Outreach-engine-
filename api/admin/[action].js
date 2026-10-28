@@ -111,6 +111,25 @@ export default async function handler(req, res) {
         }
         return res.status(200).json(await generateAndSendSms({ lead, stepPrompt: 'A short, friendly test text.' }));
       }
+      case 'sms-status': {
+        const db = getDb();
+        const { data } = await db.from('messages')
+          .select('provider_id, to_address, from_address, created_at')
+          .eq('channel', 'sms').eq('direction', 'outbound')
+          .not('provider_id', 'is', null)
+          .order('created_at', { ascending: false }).limit(1);
+        const sid = data && data[0] && data[0].provider_id;
+        if (!sid) return res.status(200).json({ error: 'no SMS with a Twilio SID yet' });
+        const asid = config.phone.twilioAccountSid;
+        const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${asid}/Messages/${sid}.json`, {
+          headers: { Authorization: 'Basic ' + Buffer.from(`${asid}:${config.phone.twilioAuthToken}`).toString('base64') },
+        });
+        const j = await r.json();
+        return res.status(200).json({
+          to: data[0].to_address, from: data[0].from_address,
+          status: j.status, error_code: j.error_code, error_message: j.error_message,
+        });
+      }
       case 'campaign-status': {
         if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
         const b = jsonBody(req) || {};
