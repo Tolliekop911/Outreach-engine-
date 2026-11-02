@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Signage</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
+  #stage img,#stage video{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;background:#000}
+  #msg{color:#888;font-family:system-ui,sans-serif;text-align:center;padding:24px}
+  #cap{position:fixed;left:0;right:0;bottom:0;color:#fff;background:rgba(0,0,0,.45);
+       font-family:system-ui,sans-serif;font-size:3vh;padding:2vh 3vw;display:none}
+</style>
+</head>
+<body>
+  <div id="stage"><div id="msg">Loading signage…</div></div>
+  <div id="cap"></div>
+<script>
+const params = new URLSearchParams(location.search);
+const screen = params.get('screen') || 'default';
+const stage = document.getElementById('stage');
+const capEl = document.getElementById('cap');
+let ads = [], idx = 0, timer = null;
+
+async function fetchPlaylist(){
+  try{
+    const r = await fetch(`/api/signage/playlist?screen=${encodeURIComponent(screen)}&_=${Date.now()}`);
+    const j = await r.json();
+    const next = Array.isArray(j.ads) ? j.ads : [];
+    // Only reset if the playlist actually changed, so refreshes don't jump.
+    if (JSON.stringify(next.map(a=>a.id)) !== JSON.stringify(ads.map(a=>a.id))) {
+      ads = next; if (idx >= ads.length) idx = 0;
+    } else { ads = next; }
+  }catch(e){ /* keep showing what we have */ }
+}
+
+function show(){
+  if (!ads.length){
+    stage.innerHTML = '<div id="msg">No ads for screen "'+screen+'" yet.</div>';
+    capEl.style.display='none';
+    timer = setTimeout(tick, 5000); return;
+  }
+  const ad = ads[idx % ads.length];
+  const dur = (ad.duration_sec || 10) * 1000;
+  if (ad.media_type === 'video'){
+    stage.innerHTML = '';
+    const v = document.createElement('video');
+    v.src = ad.media_url; v.autoplay = true; v.muted = true; v.playsInline = true;
+    v.onended = tick; v.onerror = tick;
+    stage.appendChild(v);
+    // Fallback in case onended doesn't fire.
+    timer = setTimeout(tick, Math.max(dur, 60000));
+  } else {
+    const img = new Image();
+    img.onload = ()=>{ stage.innerHTML=''; stage.appendChild(img); };
+    img.onerror = tick;
+    img.src = ad.media_url;
+    timer = setTimeout(tick, dur);
+  }
+  if (ad.caption){ capEl.textContent = ad.caption; capEl.style.display='block'; }
+  else capEl.style.display='none';
+}
+
+async function tick(){
+  clearTimeout(timer);
+  idx = (idx + 1) % Math.max(ads.length, 1);
+  show();
+}
+
+async function start(){
+  await fetchPlaylist();
+  idx = 0; show();
+  // Refresh the playlist every 60s so new ads appear without touching the screen.
+  setInterval(fetchPlaylist, 60000);
+}
+start();
+</script>
+</body>
+</html>

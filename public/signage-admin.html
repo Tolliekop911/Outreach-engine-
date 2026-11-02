@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Signage Admin</title>
+<style>
+  :root{--bg:#f4f5f8;--panel:#fff;--text:#141821;--muted:#697586;--border:#e6e9ef;--accent:#4f46e5;--bad:#dc2626}
+  @media (prefers-color-scheme:dark){:root{--bg:#0c0f14;--panel:#141922;--text:#e8ebf0;--muted:#8b96a7;--border:#232a36;--accent:#8b8cff}}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--panel)}
+  header h1{margin:0;font-size:17px}
+  .wrap{max-width:900px;margin:0 auto;padding:20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input,select{width:100%;font:inherit;padding:9px 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  button{font:inherit;cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--text);padding:8px 14px;border-radius:9px}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase}
+  img.thumb{height:40px;border-radius:6px;background:#000}
+  .muted{color:var(--muted)} .bad{color:var(--bad)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header><h1>Signage — Ad Manager</h1></header>
+<div class="wrap">
+  <div class="card">
+    <h3 style="margin-top:0">Add an ad</h3>
+    <div class="row">
+      <div><label>Screen name</label><input id="screen" value="default" /></div>
+      <div><label>Show for (seconds)</label><input id="dur" type="number" value="10" min="2" /></div>
+    </div>
+    <label>Image or video URL</label>
+    <input id="url" placeholder="https://...  (.jpg/.png or .mp4)" />
+    <label>Caption (optional, shows at bottom)</label>
+    <input id="cap" placeholder="" />
+    <div style="margin-top:14px"><button class="primary" id="add">Add ad</button> <span id="msg" class="muted"></span></div>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Each screen plays its own list in order, on a loop. Point a display at
+      <code id="playerurl"></code> (set that as the Start URL in the kiosk app).</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Current ads</h3>
+    <div id="list" class="muted">Loading…</div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(path,opts={}){
+  const r=await fetch(path,{...opts,headers:{'Content-Type':'application/json',...(opts.headers||{})}});
+  if(!r.ok) throw new Error((await r.json().catch(()=>({})))?.error||('HTTP '+r.status));
+  return r.json();
+}
+function playerUrl(){ return location.origin+'/signage?screen='+encodeURIComponent($('#screen').value||'default'); }
+function syncUrl(){ $('#playerurl').textContent=playerUrl(); }
+$('#screen').addEventListener('input',syncUrl); syncUrl();
+
+$('#add').addEventListener('click',async()=>{
+  const body={screen:$('#screen').value,media_url:$('#url').value,duration_sec:$('#dur').value,caption:$('#cap').value};
+  if(!body.media_url){ $('#msg').textContent='Add a URL first.'; return; }
+  $('#add').disabled=true; $('#msg').textContent='Adding…';
+  try{ await api('/api/signage/add',{method:'POST',body:JSON.stringify(body)}); $('#url').value='';$('#cap').value=''; $('#msg').textContent='Added.'; load(); }
+  catch(e){ $('#msg').textContent='Failed: '+e.message; }
+  finally{ $('#add').disabled=false; }
+});
+
+async function load(){
+  const l=$('#list'); l.innerHTML='Loading…';
+  try{
+    const {ads}=await api('/api/signage/list');
+    if(!ads.length){ l.innerHTML='<span class="muted">No ads yet. Add one above.</span>'; return; }
+    l.innerHTML='<table><thead><tr><th>Screen</th><th>Preview</th><th>Type</th><th>Secs</th><th>Active</th><th></th></tr></thead><tbody>'+
+      ads.map(a=>`<tr>
+        <td>${esc(a.screen)}</td>
+        <td>${a.media_type==='image'?`<img class="thumb" src="${esc(a.media_url)}">`:`<span class="muted">video</span>`}</td>
+        <td>${esc(a.media_type)}</td><td>${a.duration_sec}</td>
+        <td>${a.active?'yes':'<span class="muted">no</span>'}</td>
+        <td><button data-t="${a.id}" data-a="${a.active?0:1}">${a.active?'Disable':'Enable'}</button>
+            <button class="bad" data-r="${a.id}">Delete</button></td></tr>`).join('')+'</tbody></table>';
+    l.querySelectorAll('button[data-r]').forEach(b=>b.onclick=async()=>{ await api('/api/signage/remove',{method:'POST',body:JSON.stringify({id:b.dataset.r})}); load(); });
+    l.querySelectorAll('button[data-t]').forEach(b=>b.onclick=async()=>{ await api('/api/signage/toggle',{method:'POST',body:JSON.stringify({id:b.dataset.t,active:b.dataset.a==='1'})}); load(); });
+  }catch(e){ l.innerHTML='<span class="bad">'+esc(e.message)+'</span>'; }
+}
+load();
+</script>
+</body>
+</html>

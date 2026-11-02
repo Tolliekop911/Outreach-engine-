@@ -6,6 +6,8 @@
   },
   "rewrites": [
     { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/signage", "destination": "/signage.html" },
+    { "source": "/signage/admin", "destination": "/signage-admin.html" },
     { "source": "/health", "destination": "/api/health" },
     { "source": "/t/open/:token", "destination": "/api/t/open/:token" },
     { "source": "/t/click/:token", "destination": "/api/t/click/:token" },
