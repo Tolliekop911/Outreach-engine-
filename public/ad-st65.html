@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a1222; --ink2:#0e1a30; --paper:#f3f6fb; --sub:#9fb2cc;
+    --accent:#2dd4bf; --accent2:#38bdf8; --line:rgba(255,255,255,.09);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1920px}
+  body{
+    font-family:Inter,system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 900px at 78% -8%, rgba(56,189,248,.16), transparent 60%),
+      radial-gradient(1100px 1000px at 10% 108%, rgba(45,212,191,.14), transparent 55%),
+      linear-gradient(160deg,#0a1222 0%, #0c1830 55%, #0a1324 100%);
+    color:var(--paper); overflow:hidden; position:relative;
+  }
+  .frame{position:absolute;inset:56px;border:1px solid var(--line);border-radius:28px;pointer-events:none}
+  .pad{position:absolute;inset:0;padding:120px 104px;display:flex;flex-direction:column}
+
+  .brand{display:flex;align-items:center;gap:22px}
+  .mark{width:66px;height:66px;border-radius:16px;position:relative;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 40px rgba(45,212,191,.35)}
+  .mark:after{content:"";position:absolute;inset:16px;border:4px solid #0a1222;border-radius:7px}
+  .brand .name{font-weight:800;font-size:34px;letter-spacing:.14em}
+  .brand .name span{color:var(--accent)}
+
+  .eyebrow{margin-top:150px;font-size:26px;font-weight:600;letter-spacing:.42em;color:var(--accent);text-transform:uppercase}
+  h1{margin-top:40px;font-size:118px;line-height:1.02;font-weight:800;letter-spacing:-.025em}
+  h1 em{font-style:normal;background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{margin-top:44px;font-size:38px;line-height:1.45;color:var(--sub);font-weight:400;max-width:800px}
+
+  .feats{margin-top:92px;display:flex;flex-direction:column;gap:38px}
+  .feat{display:flex;align-items:center;gap:34px}
+  .ic{flex:none;width:86px;height:86px;border-radius:20px;background:var(--ink2);border:1px solid var(--line);
+    display:grid;place-items:center}
+  .ic svg{width:40px;height:40px;stroke:var(--accent);fill:none;stroke-width:2.2}
+  .feat .t{font-size:40px;font-weight:600;letter-spacing:-.01em}
+  .feat .t b{display:block;font-weight:400;font-size:28px;color:var(--sub);margin-top:6px;letter-spacing:0}
+
+  .cta{margin-top:auto;display:flex;align-items:center;gap:40px;
+    background:linear-gradient(135deg,rgba(45,212,191,.12),rgba(56,189,248,.08));
+    border:1px solid var(--line);border-radius:26px;padding:46px 48px}
+  .qr{flex:none;width:208px;height:208px;background:#fff;border-radius:18px;padding:16px;display:grid;place-items:center}
+  .qr img{width:100%;height:100%;display:block}
+  .cta .big{font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  .cta .small{margin-top:14px;font-size:30px;color:var(--sub)}
+  .cta .small b{color:var(--paper);font-weight:600}
+
+  .foot{margin-top:40px;display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);padding-top:34px;color:var(--sub);font-size:26px}
+  .foot .tag{letter-spacing:.02em}
+  .foot .ph{color:var(--paper);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+  <div class="pad">
+    <div class="brand">
+      <div class="mark"></div>
+      <div class="name">COWBOY&nbsp;<span>SYSTEMS</span></div>
+    </div>
+
+    <div class="eyebrow">Built for physical therapy</div>
+    <h1>Less time<br>charting.<br><em>More time<br>treating.</em></h1>
+    <div class="sub">The all-in-one EHR, billing, and AI assistant made for PT and allied-health clinics.</div>
+
+    <div class="feats">
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+        <div class="t">Notes in minutes<b>Documentation that keeps up with your day</b></div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></div>
+        <div class="t">Billing on autopilot<b>Claims, eligibility and statements, handled</b></div>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4c0 1.6-.9 2.6-1.6 3.4"/><path d="M12 3a4 4 0 0 0-4 4c0 1.6.9 2.6 1.6 3.4"/><path d="M8 21h8M10 21v-4m4 4v-4"/></svg></div>
+        <div class="t">AI does the busywork<b>Front-desk calls, reminders and follow-ups</b></div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <div class="qr"><img alt="" src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=0&data=https%3A%2F%2Fwww.cowboy-systems.com"></div>
+      <div>
+        <div class="big">Book a 15-min demo</div>
+        <div class="small">Scan the code, or visit <b>www.cowboy-systems.com</b></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="tag">All-in-One Software for Allied Health Businesses</div>
+      <div class="ph">(234) 279-2085</div>
+    </div>
+  </div>
+</body>
+</html>
