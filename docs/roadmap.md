@@ -12,7 +12,7 @@ next year, so the list can be imported and worked automatically from day one.
 ## Phase 1 - Channels (one at a time, email first)
 - [x] Email send + open/click tracking + unsubscribe (console + SendGrid adapters)
 - [x] Global suppression list checked before every send
-- [ ] Inbound reply capture for email (needs inbound-parse / IMAP wiring)
+- [x] Inbound reply capture for email (IMAP poller on the scheduler tick)
 - [x] SMS send (Twilio) + AI copy + STOP opt-out handling (inbound webhook)
 - [x] AI voice calls via Bland AI (task from pitch, suppression/cap, outcome webhook)
 

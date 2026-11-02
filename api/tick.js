@@ -2,6 +2,7 @@
 // sends `Authorization: Bearer $CRON_SECRET` automatically when that env var is
 // set, so random callers can't trigger sends.
 import { runDueEnrollments } from '../src/pipeline/runner.js';
+import { pollInbox } from '../src/channels/email/poll.js';
 
 export default async function handler(req, res) {
   const secret = process.env.CRON_SECRET;
@@ -13,7 +14,11 @@ export default async function handler(req, res) {
     // Keep each serverless tick small so it fits the function time limit; the
     // cron fires again shortly. Daily caps still govern total volume.
     const stats = await runDueEnrollments({ limit: 25 });
-    res.status(200).json(stats);
+    // Pull any inbound email replies in the same tick (best-effort).
+    let inbox = null;
+    try { inbox = await pollInbox({ limit: 25 }); }
+    catch (e) { inbox = { error: e.message }; }
+    res.status(200).json({ ...stats, inbox });
   } catch (e) {
     console.error('tick failed:', e.message);
     res.status(500).json({ error: e.message });

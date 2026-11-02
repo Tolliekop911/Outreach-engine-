@@ -123,6 +123,7 @@
         <button class="btn" id="testEmail">Send test email</button>
         <button class="btn" id="testSms">Send test SMS</button>
         <button class="btn" id="testCall">Test call</button>
+        <button class="btn" id="checkInbox">Check inbox</button>
         <button class="btn ghost" id="refresh">Refresh</button>
       </div>
     </div>
@@ -158,6 +159,16 @@ const leadState={offset:0,status:'',q:''};
 
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.tab)));
 $('#refresh').addEventListener('click',()=>load());
+$('#checkInbox').addEventListener('click',async()=>{
+  const b=$('#checkInbox'); const t=b.textContent; b.disabled=true; b.textContent='Checking...';
+  try{
+    const r=await api('/api/admin/poll-inbox',{method:'POST'});
+    if(r.skipped) alert('IMAP not configured (set SMTP/IMAP creds in Vercel).');
+    else alert('Processed '+(r.processed||0)+' new repl'+((r.processed===1)?'y':'ies')+'.');
+    load();
+  }catch(e){ alert('Failed: '+e.message); }
+  finally{ b.disabled=false; b.textContent=t; }
+});
 $('#testCall').addEventListener('click',async()=>{
   const phone=prompt('Place a REAL AI test call to (E.164, e.g. +27670155389):');
   if(!phone) return;

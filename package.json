@@ -1,6 +1,6 @@
 {
   "name": "cowboy-outreach-engine",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "private": true,
   "description": "AI-driven lead outreach automation across email, SMS, and voice.",
   "type": "module",
@@ -14,6 +14,8 @@
     "@supabase/supabase-js": "^2.45.4",
     "csv-parse": "^5.5.6",
     "dotenv": "^16.4.5",
+    "imapflow": "^1.0.164",
+    "mailparser": "^3.7.1",
     "nodemailer": "^6.9.14",
     "xlsx": "^0.18.5"
   }

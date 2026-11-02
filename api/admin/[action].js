@@ -13,6 +13,7 @@ import { importCsvText } from '../../src/leads/import.js';
 import { generateAndSendEmail } from '../../src/channels/email/aiSend.js';
 import { generateAndSendSms } from '../../src/channels/sms/aiSend.js';
 import { callLead } from '../../src/channels/voice/call.js';
+import { pollInbox } from '../../src/channels/email/poll.js';
 
 function keyRole(k) {
   if (!k) return 'MISSING';
@@ -129,6 +130,9 @@ export default async function handler(req, res) {
           lead = ins.data;
         }
         return res.status(200).json(await callLead({ lead, stepPrompt: 'A short, friendly test call.' }));
+      }
+      case 'poll-inbox': {
+        return res.status(200).json(await pollInbox({ limit: 25 }));
       }
       case 'sms-status': {
         const db = getDb();

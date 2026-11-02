@@ -65,6 +65,13 @@ export const config = {
       user: env.SMTP_USER || '',
       pass: env.SMTP_PASS || '',
     },
+    // IMAP for reading inbound replies (defaults to the SMTP mailbox).
+    imap: {
+      host: env.IMAP_HOST || env.SMTP_HOST || 'mail.privateemail.com',
+      port: int(env.IMAP_PORT, 993),
+      user: env.IMAP_USER || env.SMTP_USER || '',
+      pass: env.IMAP_PASS || env.SMTP_PASS || '',
+    },
   },
   // AI voice calls via Bland AI (bland.ai). Used when EMAIL_PROVIDER-style voice
   // steps run. Needs BLAND_API_KEY; from-number must be a Bland-provisioned number.
