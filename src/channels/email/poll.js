@@ -4,7 +4,7 @@
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 import config from '../../config/index.js';
-import { handleInboundEmail } from './inbound.js';
+import { handleInboundEmail, isBounce, handleBounce } from './inbound.js';
 
 export async function pollInbox({ limit = 25 } = {}) {
   const { host, port, user, pass } = config.email.imap;
@@ -28,8 +28,13 @@ export async function pollInbox({ limit = 25 } = {}) {
       const subject = parsed.subject || '';
       const text = (parsed.text || parsed.html || '').toString();
       try {
-        const res = await handleInboundEmail({ from, subject, text, providerId: parsed.messageId });
-        stats.acted.push({ from, matched: res.matched, category: res.category, action: res.action });
+        if (isBounce(from, subject)) {
+          const res = await handleBounce(text);
+          stats.acted.push({ from, bounce: true, suppressed: res.suppressed });
+        } else {
+          const res = await handleInboundEmail({ from, subject, text, providerId: parsed.messageId });
+          stats.acted.push({ from, matched: res.matched, category: res.category, action: res.action });
+        }
       } catch (e) {
         console.error('inbound handling failed for', from, e.message);
       }

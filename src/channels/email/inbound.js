@@ -133,3 +133,32 @@ export async function handleInboundEmail(inbound, opts = {}) {
 }
 
 export default handleInboundEmail;
+
+// --- Bounce handling -------------------------------------------------------
+// Namecheap/SMTP bounces arrive as delivery-failure emails in the inbox. Detect
+// them, pull the failed recipient(s) out of the body, and suppress those leads
+// so we never send to the dead address again.
+export function isBounce(from, subject) {
+  const f = String(from || '').toLowerCase();
+  const s = String(subject || '').toLowerCase();
+  if (/mailer-daemon|postmaster|mail delivery|no-?reply/.test(f)) return true;
+  return /undeliverable|delivery status|delivery failure|failure notice|returned mail|mail delivery (failed|subsystem)|not delivered|address not found/.test(s);
+}
+
+export async function handleBounce(text) {
+  const db = getDb();
+  const found = (String(text || '').match(/[\w.+-]+@[\w-]+\.[\w.-]+\.[a-z]{2,}/gi) || [])
+    .map((e) => e.toLowerCase());
+  const emails = [...new Set(found)];
+  let suppressed = 0;
+  for (const email of emails) {
+    const { data } = await db.from('leads').select('id').eq('email', email).limit(1);
+    const lead = data && data[0];
+    if (!lead) continue; // not one of our leads (e.g. our own from-address)
+    await addSuppression({ email, scope: 'all', reason: 'bounce', note: 'delivery failure' });
+    await db.from('leads').update({ status: 'unqualified' }).eq('id', lead.id);
+    await db.from('message_events').insert({ lead_id: lead.id, event_type: 'bounce', detail: { email } });
+    suppressed++;
+  }
+  return { bounce: true, suppressed };
+}

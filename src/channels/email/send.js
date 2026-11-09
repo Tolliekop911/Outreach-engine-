@@ -3,6 +3,7 @@
 // On a real send it records the message and returns the row id.
 import config from '../../config/index.js';
 import { getDb } from '../../db/client.js';
+import { resolveMx } from 'node:dns/promises';
 import { isSuppressed } from '../suppression.js';
 import { getEmailProvider } from './providers/index.js';
 import { renderTrackedHtml } from './tracking.js';
@@ -37,6 +38,18 @@ export async function sendEmailToLead(args, opts = {}) {
 
   if (!lead?.email) {
     return { sent: false, skipped: true, reason: 'no_email' };
+  }
+  // Free dead-domain filter: a domain with no MX records can't receive mail, so
+  // skip it instead of generating a guaranteed bounce.
+  const domain = lead.email.split('@')[1] || '';
+  try {
+    const mx = await resolveMx(domain);
+    if (!mx || mx.length === 0) return { sent: false, skipped: true, reason: 'no_mx' };
+  } catch (err) {
+    if (err && (err.code === 'ENOTFOUND' || err.code === 'ENODATA')) {
+      return { sent: false, skipped: true, reason: 'no_mx' };
+    }
+    // transient DNS error: don't block the send
   }
   if (await isSuppressed({ email: lead.email, channel: 'email' })) {
     return { sent: false, skipped: true, reason: 'suppressed' };
