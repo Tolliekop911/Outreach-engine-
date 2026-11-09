@@ -124,7 +124,7 @@
         <button class="btn" id="testSms">Send test SMS</button>
         <button class="btn" id="testCall">Test call</button>
         <button class="btn" id="checkInbox">Check inbox</button>
-        <button class="btn primary" id="sendBatch">Send next 200</button>
+        <button class="btn primary" id="sendBatch">Send emails</button>
         <button class="btn ghost" id="refresh">Refresh</button>
       </div>
     </div>
@@ -160,7 +160,7 @@ const leadState={offset:0,status:'',q:''};
 
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.tab)));
 $('#sendBatch').addEventListener('click',async()=>{
-  const target=parseInt(prompt('How many to send in this batch?','200'),10);
+  const target=parseInt(prompt('How many emails to send now? (it continues where it left off each time)','200'),10);
   if(!target||target<1) return;
   const b=$('#sendBatch'); const label=b.textContent; b.disabled=true;
   let total=0;
