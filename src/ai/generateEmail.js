@@ -100,7 +100,7 @@ export async function generateEmail(args) {
 
   const response = await client.messages.create({
     model: config.ai.model,
-    max_tokens: 800,
+    max_tokens: 1600,
     thinking: { type: 'adaptive' },
     output_config: { effort: 'low' }, // bulk cold email: fast + cheap
     system: buildSystemPrompt(),

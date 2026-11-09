@@ -152,7 +152,9 @@ export default async function handler(req, res) {
         if (error) return res.status(500).json({ error: error.message });
         let sent = 0, failed = 0, capped = false;
         for (const lead of leads) {
-          const r = await generateAndSendEmail({ lead });
+          let r;
+          try { r = await generateAndSendEmail({ lead }); }
+          catch (e) { r = { sent: false, reason: e.message }; } // one bad email never stops the batch
           if (r.reason === 'daily_cap_reached') { capped = true; break; }
           // Mark touched either way so the batch advances and never re-sends.
           await db.from('leads').update({ status: r.sent ? 'active' : 'unqualified' }).eq('id', lead.id);
