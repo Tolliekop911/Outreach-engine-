@@ -9,7 +9,7 @@ const HEADER_ALIASES = {
   firstName: ['first', 'firstname', 'fname', 'givenname'],
   lastName: ['last', 'lastname', 'lname', 'surname', 'familyname'],
   title: ['title', 'jobtitle', 'credential', 'credentials', 'role', 'position'],
-  organization: ['organization', 'org', 'company', 'clinic', 'practice', 'employer', 'facility'],
+  organization: ['organization', 'org', 'company', 'companyname', 'clinic', 'practice', 'employer', 'facility'],
   specialty: ['specialty', 'speciality', 'discipline', 'focus'],
   city: ['city', 'town'],
   state: ['state', 'province', 'region'],

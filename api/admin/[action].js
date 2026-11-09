@@ -131,6 +131,37 @@ export default async function handler(req, res) {
         }
         return res.status(200).json(await callLead({ lead, stepPrompt: 'A short, friendly test call.' }));
       }
+      case 'batch-stats': {
+        const db = getDb();
+        const unsent = await db.from('leads').select('id', { count: 'exact', head: true })
+          .eq('status', 'new').not('email', 'is', null);
+        const sent = await db.from('leads').select('id', { count: 'exact', head: true })
+          .neq('status', 'new').not('email', 'is', null);
+        return res.status(200).json({ unsent: unsent.count || 0, sent: sent.count || 0 });
+      }
+      case 'send-batch': {
+        if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
+        const b = jsonBody(req) || {};
+        // Small per-call chunk so the serverless call finishes in time; the
+        // dashboard loops this to reach the full batch (e.g. 200).
+        const n = Math.min(Math.max(parseInt(b.n, 10) || 8, 1), 12);
+        const db = getDb();
+        const { data: leads, error } = await db.from('leads').select('*')
+          .eq('status', 'new').not('email', 'is', null)
+          .order('created_at', { ascending: true }).limit(n);
+        if (error) return res.status(500).json({ error: error.message });
+        let sent = 0, failed = 0, capped = false;
+        for (const lead of leads) {
+          const r = await generateAndSendEmail({ lead });
+          if (r.reason === 'daily_cap_reached') { capped = true; break; }
+          // Mark touched either way so the batch advances and never re-sends.
+          await db.from('leads').update({ status: r.sent ? 'active' : 'unqualified' }).eq('id', lead.id);
+          if (r.sent) sent++; else failed++;
+        }
+        const rem = await db.from('leads').select('id', { count: 'exact', head: true })
+          .eq('status', 'new').not('email', 'is', null);
+        return res.status(200).json({ sent, failed, capped, remaining: rem.count || 0 });
+      }
       case 'poll-inbox': {
         return res.status(200).json(await pollInbox({ limit: 25 }));
       }

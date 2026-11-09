@@ -124,6 +124,7 @@
         <button class="btn" id="testSms">Send test SMS</button>
         <button class="btn" id="testCall">Test call</button>
         <button class="btn" id="checkInbox">Check inbox</button>
+        <button class="btn primary" id="sendBatch">Send next 200</button>
         <button class="btn ghost" id="refresh">Refresh</button>
       </div>
     </div>
@@ -158,6 +159,25 @@ let tab='overview';
 const leadState={offset:0,status:'',q:''};
 
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.tab)));
+$('#sendBatch').addEventListener('click',async()=>{
+  const target=parseInt(prompt('How many to send in this batch?','200'),10);
+  if(!target||target<1) return;
+  const b=$('#sendBatch'); const label=b.textContent; b.disabled=true;
+  let total=0;
+  try{
+    while(total<target){
+      const r=await api('/api/admin/send-batch',{method:'POST',body:JSON.stringify({n:10})});
+      total+=(r.sent||0);
+      b.textContent='Sending '+total+'/'+target+'… ('+r.remaining+' left in list)';
+      if(r.capped){ alert('Daily send cap reached — sent '+total+' this run. Run again tomorrow or raise MAX_EMAILS_PER_DAY.'); break; }
+      if((r.sent||0)===0){ alert(r.remaining===0?'All leads have been sent to.':'Nothing sent this pass (check logs).'); break; }
+      if(r.remaining===0){ alert('Sent '+total+'. That was the last of the list.'); break; }
+    }
+    if(total>=target) alert('Done — sent '+total+' emails this batch. Click again to send the next '+target+'.');
+    load();
+  }catch(e){ alert('Batch failed after '+total+': '+e.message); }
+  finally{ b.disabled=false; b.textContent=label; }
+});
 $('#refresh').addEventListener('click',()=>load());
 $('#checkInbox').addEventListener('click',async()=>{
   const b=$('#checkInbox'); const t=b.textContent; b.disabled=true; b.textContent='Checking...';
