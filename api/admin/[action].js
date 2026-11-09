@@ -144,7 +144,7 @@ export default async function handler(req, res) {
         const b = jsonBody(req) || {};
         // Small per-call chunk so the serverless call finishes in time; the
         // dashboard loops this to reach the full batch (e.g. 200).
-        const n = Math.min(Math.max(parseInt(b.n, 10) || 8, 1), 12);
+        const n = Math.min(Math.max(parseInt(b.n, 10) || 4, 1), 5);
         const db = getDb();
         const { data: leads, error } = await db.from('leads').select('*')
           .eq('status', 'new').not('email', 'is', null)

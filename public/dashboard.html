@@ -166,7 +166,7 @@ $('#sendBatch').addEventListener('click',async()=>{
   let total=0;
   try{
     while(total<target){
-      const r=await api('/api/admin/send-batch',{method:'POST',body:JSON.stringify({n:10})});
+      const r=await api('/api/admin/send-batch',{method:'POST',body:JSON.stringify({n:4})});
       total+=(r.sent||0);
       b.textContent='Sending '+total+'/'+target+'… ('+r.remaining+' left in list)';
       if(r.capped){ alert('Daily send cap reached — sent '+total+' this run. Run again tomorrow or raise MAX_EMAILS_PER_DAY.'); break; }
