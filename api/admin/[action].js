@@ -133,6 +133,15 @@ export default async function handler(req, res) {
         }
         return res.status(200).json(await callLead({ lead, stepPrompt: 'A short, friendly test call.' }));
       }
+      case 'mx-test': {
+        const domains = ['gmail.com', 'airphysicaltherapy.com', 'thisdomaindoesnotexist-xyz987654.com', 'no-such-clinic-zzz.com'];
+        const out = {};
+        for (const d of domains) {
+          try { const mx = await resolveMx(d); out[d] = (mx && mx.length) ? 'VALID' : 'NO-MX (dead)'; }
+          catch (e) { out[d] = 'DEAD (' + (e.code || 'err') + ')'; }
+        }
+        return res.status(200).json(out);
+      }
       case 'scrub-stats': {
         const db = getDb();
         const toCheck = await db.from('leads').select('id', { count: 'exact', head: true })
