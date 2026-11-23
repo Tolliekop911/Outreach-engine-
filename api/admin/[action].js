@@ -14,6 +14,8 @@ import { generateAndSendEmail } from '../../src/channels/email/aiSend.js';
 import { generateAndSendSms } from '../../src/channels/sms/aiSend.js';
 import { callLead } from '../../src/channels/voice/call.js';
 import { pollInbox } from '../../src/channels/email/poll.js';
+import { addSuppression } from '../../src/channels/suppression.js';
+import { resolveMx } from 'node:dns/promises';
 
 function keyRole(k) {
   if (!k) return 'MISSING';
@@ -130,6 +132,54 @@ export default async function handler(req, res) {
           lead = ins.data;
         }
         return res.status(200).json(await callLead({ lead, stepPrompt: 'A short, friendly test call.' }));
+      }
+      case 'scrub-stats': {
+        const db = getDb();
+        const toCheck = await db.from('leads').select('id', { count: 'exact', head: true })
+          .eq('status', 'new').eq('scrubbed', false).not('email', 'is', null);
+        return res.status(200).json({ to_check: toCheck.count || 0 });
+      }
+      case 'scrub': {
+        if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
+        const b = jsonBody(req) || {};
+        const n = Math.min(Math.max(parseInt(b.n, 10) || 100, 1), 200);
+        const db = getDb();
+        const { data: leads, error } = await db.from('leads')
+          .select('id, email').eq('status', 'new').eq('scrubbed', false)
+          .not('email', 'is', null).limit(n);
+        if (error) return res.status(500).json({ error: error.message });
+        const mxCache = new Map();
+        let removed = 0, kept = 0;
+        for (const lead of leads) {
+          const email = String(lead.email).toLowerCase();
+          const syntaxOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+          const domain = email.split('@')[1] || '';
+          let valid = syntaxOk;
+          if (valid) {
+            if (mxCache.has(domain)) valid = mxCache.get(domain);
+            else {
+              try {
+                const mx = await resolveMx(domain);
+                valid = !!(mx && mx.length);
+              } catch (e) {
+                // dead domain -> invalid; transient error -> keep (assume valid)
+                valid = !(e && (e.code === 'ENOTFOUND' || e.code === 'ENODATA'));
+              }
+              mxCache.set(domain, valid);
+            }
+          }
+          if (valid) {
+            await db.from('leads').update({ scrubbed: true }).eq('id', lead.id);
+            kept++;
+          } else {
+            await db.from('leads').update({ scrubbed: true, status: 'unqualified' }).eq('id', lead.id);
+            await addSuppression({ email, scope: 'all', reason: 'bounce', note: 'scrub: bad address/domain' });
+            removed++;
+          }
+        }
+        const rem = await db.from('leads').select('id', { count: 'exact', head: true })
+          .eq('status', 'new').eq('scrubbed', false).not('email', 'is', null);
+        return res.status(200).json({ checked: leads.length, kept, removed, remaining: rem.count || 0 });
       }
       case 'export-emails': {
         const db = getDb();

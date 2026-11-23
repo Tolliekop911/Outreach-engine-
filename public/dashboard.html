@@ -124,6 +124,7 @@
         <button class="btn" id="testSms">Send test SMS</button>
         <button class="btn" id="testCall">Test call</button>
         <button class="btn" id="checkInbox">Check inbox</button>
+        <button class="btn" id="scrub">Scrub list</button>
         <button class="btn primary" id="sendBatch">Send emails</button>
         <button class="btn ghost" id="refresh">Refresh</button>
       </div>
@@ -177,6 +178,22 @@ $('#sendBatch').addEventListener('click',async()=>{
     load();
   }catch(e){ alert('Batch failed after '+total+': '+e.message); }
   finally{ b.disabled=false; b.textContent=label; }
+});
+$('#scrub').addEventListener('click',async()=>{
+  if(!confirm('Clean the whole list? Checks every address for a valid domain/mail server and removes dead ones. Free, runs in the background.')) return;
+  const b=$('#scrub'); const t=b.textContent; b.disabled=true;
+  let checked=0, removed=0;
+  try{
+    for(;;){
+      const r=await api('/api/admin/scrub',{method:'POST',body:JSON.stringify({n:100})});
+      checked+=r.checked; removed+=r.removed;
+      b.textContent='Scrubbing… '+checked+' checked, '+removed+' removed ('+r.remaining+' left)';
+      if(r.checked===0||r.remaining===0) break;
+    }
+    alert('Scrub done: '+checked+' checked, '+removed+' dead addresses removed. The rest are ready to send.');
+    load();
+  }catch(e){ alert('Scrub stopped after '+checked+': '+e.message); }
+  finally{ b.disabled=false; b.textContent=t; }
 });
 $('#refresh').addEventListener('click',()=>load());
 $('#checkInbox').addEventListener('click',async()=>{
