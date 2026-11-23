@@ -6,7 +6,7 @@ import { getDb } from '../../db/client.js';
 import { resolveMx } from 'node:dns/promises';
 import { isSuppressed } from '../suppression.js';
 import { getEmailProvider } from './providers/index.js';
-import { renderTrackedHtml } from './tracking.js';
+import { renderEmail } from './template.js';
 
 async function countSentToday(db) {
   const start = new Date();
@@ -77,9 +77,7 @@ export async function sendEmailToLead(args, opts = {}) {
     .single();
   if (insErr) throw new Error(`Failed to create message: ${insErr.message}`);
 
-  const trackedHtml = renderTrackedHtml({
-    html, messageId: msg.id, leadId: lead.id, email: lead.email,
-  });
+  const trackedHtml = renderEmail({ lead, html, messageId: msg.id });
 
   if (dryRun) {
     await db.from('messages').update({ body: trackedHtml, error: 'dry_run (not sent)' })

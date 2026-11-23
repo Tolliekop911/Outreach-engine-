@@ -39,6 +39,12 @@ export const config = {
     signatureTagline: env.OUTREACH_SIGNATURE_TAGLINE || 'All-in-One Software for Allied Health Businesses',
     phone: env.OUTREACH_PHONE || '(234) 279-2085',
     website: env.OUTREACH_WEBSITE || 'www.cowboy-systems.com',
+    // Signed-by person in the template signature.
+    signaturePerson: env.OUTREACH_SIGNATURE_PERSON || 'Dr. Brian J. Gallagher DPT, PT, MS',
+    // BBB: paste the official seal image URL from your BBB profile (optional);
+    // bbbUrl is where the badge links. If no seal URL, a text badge is shown.
+    bbbSealUrl: env.OUTREACH_BBB_SEAL_URL || '',
+    bbbUrl: env.OUTREACH_BBB_URL || 'https://www.bbb.org',
   },
   db: {
     url: env.SUPABASE_URL || '',
