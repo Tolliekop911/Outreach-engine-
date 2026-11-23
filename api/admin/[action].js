@@ -131,6 +131,26 @@ export default async function handler(req, res) {
         }
         return res.status(200).json(await callLead({ lead, stepPrompt: 'A short, friendly test call.' }));
       }
+      case 'export-emails': {
+        const db = getDb();
+        const rows = [];
+        let from = 0; const page = 1000;
+        for (;;) {
+          const { data, error } = await db.from('leads')
+            .select('email, first_name, last_name, organization, status')
+            .not('email', 'is', null).range(from, from + page - 1);
+          if (error) return res.status(500).json({ error: error.message });
+          rows.push(...data);
+          if (data.length < page) break;
+          from += page;
+        }
+        const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+        const csv = 'email,first_name,last_name,organization,status\n' +
+          rows.map((r) => [r.email, r.first_name, r.last_name, r.organization, r.status].map(q).join(',')).join('\n');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="cowboy-leads.csv"');
+        return res.status(200).send(csv);
+      }
       case 'batch-stats': {
         const db = getDb();
         const unsent = await db.from('leads').select('id', { count: 'exact', head: true })
