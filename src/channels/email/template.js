@@ -81,7 +81,7 @@ export function renderEmail({ lead, html, messageId }) {
    <tr><td style="padding:26px 28px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;color:${MUTE}">Thank you for your time,</td></tr>
    <tr><td style="padding:8px 28px 0;font-family:Arial,Helvetica,sans-serif">
      <div style="font-size:16px;font-weight:700;color:${INK}">${esc(o.signaturePerson)}</div>
-     <div style="font-size:15px;color:${MUTE}">${esc(o.signatureName)}</div>
+     <div style="font-size:15px;color:${MUTE}">Cowboy Systems</div>
    </td></tr>
    <tr><td style="padding:22px 28px 0">${bbbBadge(o, messageId)}</td></tr>
    <tr><td style="padding:22px 28px 30px">
