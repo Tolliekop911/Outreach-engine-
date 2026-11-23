@@ -37,11 +37,7 @@ function bbbBadge(o, messageId) {
     return `<a href="${link}"><img src="${esc(o.bbbSealUrl)}" alt="BBB Accredited Business" height="56" style="border:0;display:inline-block"></a>`;
   }
   // Clean text badge fallback until the official seal URL is set.
-  return `<a href="${link}" style="text-decoration:none">
-    <span style="display:inline-block;border:2px solid #0a4d8c;border-radius:8px;padding:8px 14px;font-family:Arial,Helvetica,sans-serif">
-      <span style="color:#0a4d8c;font-weight:800;font-size:15px;letter-spacing:.03em">BBB</span>
-      <span style="color:${INK};font-weight:600;font-size:12px;margin-left:6px">ACCREDITED BUSINESS</span>
-    </span></a>`;
+  return `<a href="${link}" style="text-decoration:none"><span style="display:inline-block;border:2px solid #0a4d8c;border-radius:8px;padding:9px 14px;font-family:Arial,Helvetica,sans-serif;line-height:16px"><span style="color:#0a4d8c;font-weight:800;font-size:16px;letter-spacing:.03em;vertical-align:middle">BBB</span><span style="color:${INK};font-weight:700;font-size:11px;letter-spacing:.04em;margin-left:7px;vertical-align:middle">ACCREDITED&nbsp;BUSINESS</span></span></a>`;
 }
 
 export function renderEmail({ lead, html, messageId }) {
