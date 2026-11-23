@@ -37,6 +37,8 @@ export function buildSystemPrompt(outreach = config.outreach) {
     '- Personalize from the lead details; never invent facts about the lead or',
     '  the product, and never fabricate a mutual connection or prior contact.',
     '- One clear, low-pressure call to action.',
+    '- Do NOT open with a greeting or the person\'s name (no "Hi Jane," / "Hey',
+    '  Jane,") - the email already greets them. Start with your first real sentence.',
     '- Do NOT write a sign-off, signature, name, unsubscribe, or footer - the',
     '  system appends all of that. End on your last real sentence.',
     '- Body as simple HTML (<p> paragraphs, optional <a> for the CTA link).',
