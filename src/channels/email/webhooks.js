@@ -15,12 +15,35 @@ async function recordEvent(type, { messageId = null, leadId = null, detail = {} 
   if (error) throw new Error(`Failed to record ${type} event: ${error.message}`);
 }
 
-export async function recordOpen(messageId) {
-  await recordEvent('open', { messageId });
+// Security scanners (Microsoft Safe Links, Mimecast, Proofpoint, Barracuda,
+// Google image proxy, etc.) auto-open and pre-click every email on arrival,
+// inflating opens/clicks. Filter those so the funnel reflects real humans.
+const BOT_UA = /bot|crawl|spider|preview|scan|proofpoint|mimecast|barracuda|microsoft|outlook|office365|googleimageproxy|google-read-aloud|symantec|forcepoint|fireeye|sophos|trend ?micro|cisco|ironport|slackbot|facebookexternalhit|curl|wget|python-requests|go-http|headless|phantom/i;
+
+async function isBotHit(db, messageId, userAgent) {
+  if (userAgent && BOT_UA.test(userAgent)) return true;
+  if (!messageId) return false;
+  try {
+    const { data } = await db.from('messages').select('sent_at').eq('id', messageId).single();
+    if (data?.sent_at) {
+      const age = Date.now() - new Date(data.sent_at).getTime();
+      // A hit within 15s of sending is almost always an automated scanner.
+      if (age >= 0 && age < 15000) return true;
+    }
+  } catch { /* ignore */ }
+  return false;
 }
 
-export async function recordClick(messageId, url) {
-  await recordEvent('click', { messageId, detail: { url } });
+export async function recordOpen(messageId, userAgent) {
+  const db = getDb();
+  const bot = await isBotHit(db, messageId, userAgent);
+  await recordEvent(bot ? 'open_bot' : 'open', { messageId, detail: { ua: userAgent || null } });
+}
+
+export async function recordClick(messageId, url, userAgent) {
+  const db = getDb();
+  const bot = await isBotHit(db, messageId, userAgent);
+  await recordEvent(bot ? 'click_bot' : 'click', { messageId, detail: { url, ua: userAgent || null } });
 }
 
 // Honor an unsubscribe: suppress the email and mark the lead.

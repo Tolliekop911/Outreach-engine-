@@ -5,7 +5,7 @@ import { recordClick } from '../../../src/channels/email/webhooks.js';
 export default async function handler(req, res) {
   const p = verifyToken(String(req.query.token || ''));
   if (p?.k === 'c' && p.m && /^https?:\/\//i.test(p.u || '')) {
-    try { await recordClick(p.m, p.u); } catch (e) { console.error('click record failed:', e.message); }
+    try { await recordClick(p.m, p.u, req.headers['user-agent']); } catch (e) { console.error('click record failed:', e.message); }
     res.status(302).setHeader('Location', p.u);
     res.end();
     return;

@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const token = String(req.query.token || '').replace(/\.gif$/, '');
   const p = verifyToken(token);
   if (p?.k === 'o' && p.m) {
-    try { await recordOpen(p.m); } catch (e) { console.error('open record failed:', e.message); }
+    try { await recordOpen(p.m, req.headers['user-agent']); } catch (e) { console.error('open record failed:', e.message); }
   }
   res.status(200);
   res.setHeader('Content-Type', 'image/gif');
