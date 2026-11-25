@@ -16,17 +16,17 @@ async function count(db, table, build = (q) => q) {
   return n || 0;
 }
 
-// Count DISTINCT leads for an engagement event type (so one person who got
-// their email scanned and "clicked" 5 links counts once, not five times).
+// Count DISTINCT emails (message id) for an engagement event type, so one email
+// that got its links scanned 5 times counts once, not five.
 async function distinctLeads(db, eventType) {
   const ids = new Set();
   let from = 0; const page = 1000;
   for (;;) {
     const { data, error } = await db.from('message_events')
-      .select('lead_id').eq('event_type', eventType).not('lead_id', 'is', null)
+      .select('message_id').eq('event_type', eventType).not('message_id', 'is', null)
       .range(from, from + page - 1);
     if (error) throw new Error(`distinctLeads(${eventType}) failed: ${error.message}`);
-    for (const r of data) ids.add(r.lead_id);
+    for (const r of data) ids.add(r.message_id);
     if (data.length < page) break;
     from += page;
   }
